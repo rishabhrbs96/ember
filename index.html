@@ -17,7 +17,7 @@
     --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --paper: #141210;
       --ink: #efe9e2;
       --muted: #a39b92;
@@ -25,6 +25,14 @@
       --ember: #ff7a3d;
       --ember-glow: rgba(255, 122, 61, 0.4);
     }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141210;
+    --ink: #efe9e2;
+    --muted: #a39b92;
+    --line: #2a2622;
+    --ember: #ff7a3d;
+    --ember-glow: rgba(255, 122, 61, 0.4);
   }
 
   * { box-sizing: border-box; }
@@ -34,47 +42,106 @@
     font: 1.0625rem/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
+    transition: background 0.3s var(--ease), color 0.3s var(--ease);
   }
+  button { font: inherit; color: inherit; }
 
   main {
     max-width: 30rem;
     margin: 0 auto;
-    padding: clamp(2rem, 8vh, 5rem) 1.25rem 8rem;
+    padding: clamp(1.5rem, 6vh, 4rem) 1.25rem 8rem;
   }
 
-  /* Header: the ember and the streak line. The only place the accent glows. */
+  /* Header: the hearth. Flame, streak numeral, theme switch. */
   header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    min-height: 2rem;
-    margin-bottom: 2rem;
-    color: var(--muted);
-    font-size: 0.9375rem;
+    margin-bottom: 1.25rem;
   }
-  .ember {
-    width: 14px; height: 14px;
+  .hearth {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .flame {
+    width: 28px; height: 28px;
     flex: none;
-    border-radius: 50%;
-    border: 2px solid var(--muted);
-    background: transparent;
-    transition: background 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.75;
+    stroke-linejoin: round;
+    transform-origin: 50% 90%;
+    transition: fill 0.4s var(--ease), stroke 0.4s var(--ease), filter 0.4s var(--ease);
   }
-  .ember.lit {
-    background: var(--ember);
-    border-color: var(--ember);
-    box-shadow: 0 0 12px 3px var(--ember-glow);
+  .flame.lit {
+    fill: var(--ember);
+    stroke: var(--ember);
+    filter: drop-shadow(0 0 8px var(--ember-glow));
+    animation: flicker 2.8s ease-in-out infinite;
   }
-  .ember.flare { animation: flare 0.6s var(--ease); }
+  @keyframes flicker {
+    0%, 100% { transform: scale(1) rotate(0); }
+    30%       { transform: scale(1.04, 1.06) rotate(-1.5deg); }
+    65%       { transform: scale(0.98, 1.02) rotate(1.5deg); }
+  }
+  .flame.flare { animation: flare 0.7s var(--ease); }
   @keyframes flare {
     0%   { transform: scale(1); }
-    35%  { transform: scale(1.7); box-shadow: 0 0 22px 8px var(--ember-glow); }
+    35%  { transform: scale(1.5); filter: drop-shadow(0 0 18px var(--ember-glow)); }
     100% { transform: scale(1); }
   }
+  .count {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .count.cold { color: var(--muted); font-weight: 500; }
+  .streak-line {
+    color: var(--muted);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+  .theme {
+    min-height: 44px;
+    padding: 0 0.5rem;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .theme:hover { color: var(--ink); }
+
+  /* Views: plain text tabs. The active one carries the ember underline. */
+  nav {
+    display: flex;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+  }
+  nav button {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+  }
+  nav button:hover { color: var(--ink); }
+  nav button[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ember); }
 
   /* Input: an underline, nothing else. Focus is the accent's second job. */
   form { margin-bottom: 0.5rem; }
-  #new {
+  .field {
     width: 100%;
     min-height: 44px;
     padding: 0.5rem 0;
@@ -88,8 +155,8 @@
     outline: none;
     transition: border-color 0.2s var(--ease);
   }
-  #new::placeholder { color: var(--muted); opacity: 1; }
-  #new:focus-visible { border-bottom-color: var(--ember); }
+  .field::placeholder { color: var(--muted); opacity: 1; }
+  .field:focus-visible { border-bottom-color: var(--ember); }
 
   /* Rows: hairlines separate tasks. No cards. */
   ul { list-style: none; margin: 0; padding: 0; }
@@ -97,22 +164,16 @@
     display: flex;
     align-items: stretch;
     border-bottom: 1px solid var(--line);
-    will-change: transform;
   }
   li.enter { animation: enter 0.22s var(--ease); }
   @keyframes enter {
     from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: none; }
   }
-  li.leave {
-    animation: leave 0.2s var(--ease) forwards;
-    pointer-events: none;
-  }
-  @keyframes leave {
-    to { opacity: 0; transform: translateX(12px); }
-  }
+  li.leave { animation: leave 0.2s var(--ease) forwards; pointer-events: none; }
+  @keyframes leave { to { opacity: 0; transform: translateX(12px); } }
 
-  .toggle {
+  .toggle, .plain {
     flex: 1;
     display: flex;
     align-items: center;
@@ -121,13 +182,11 @@
     padding: 0.6rem 0;
     border: 0;
     background: none;
-    color: inherit;
-    font: inherit;
     text-align: left;
-    cursor: pointer;
     overflow-wrap: anywhere;
     transition: color 0.25s var(--ease);
   }
+  .toggle { cursor: pointer; }
   .mark {
     width: 20px; height: 20px;
     flex: none;
@@ -161,6 +220,16 @@
     transition: transform 0.25s var(--ease);
   }
   li.done .text::after { transform: scaleX(1); }
+  /* A small flame marks a task that came from Kindling. */
+  .kindled {
+    width: 14px; height: 14px;
+    flex: none;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.75;
+    stroke-linejoin: round;
+    margin-left: -0.25rem;
+  }
 
   .remove {
     width: 44px;
@@ -179,12 +248,9 @@
 
   :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 3px; }
 
-  .note {
-    color: var(--muted);
-    margin: 2.5rem 0 0;
-    text-align: center;
-  }
+  .note { color: var(--muted); margin: 2.5rem 0 0; text-align: center; }
   .note.error { color: var(--ink); }
+  .lead { color: var(--muted); margin: 0 0 1.25rem; }
 
   .foot {
     display: flex;
@@ -195,18 +261,17 @@
     font-size: 0.9375rem;
     color: var(--muted);
   }
-  .foot button {
+  .link {
     min-height: 44px;
     padding: 0 0.25rem;
     border: 0;
     background: none;
     color: inherit;
-    font: inherit;
     text-decoration: underline;
     text-underline-offset: 3px;
     cursor: pointer;
   }
-  .foot button:hover { color: var(--ink); }
+  .link:hover { color: var(--ink); }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -214,54 +279,119 @@
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="flame-shape" viewBox="0 0 24 24">
+    <path d="M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z"/>
+  </symbol>
+</svg>
 <main>
   <header>
-    <span class="ember" id="ember" aria-hidden="true"></span>
-    <span id="streak" role="status"></span>
+    <div class="hearth">
+      <svg class="flame" id="flame" aria-hidden="true"><use href="#flame-shape"/></svg>
+      <span class="count" id="count" aria-hidden="true"></span>
+      <span class="streak-line" id="streak" role="status"></span>
+    </div>
+    <button type="button" class="theme" id="theme"></button>
   </header>
 
-  <form id="form" autocomplete="off">
-    <input id="new" type="text" placeholder="What needs doing?" aria-label="New task" autofocus enterkeyhint="done" maxlength="200">
-  </form>
+  <nav aria-label="Views">
+    <button type="button" data-view="today">Today</button>
+    <button type="button" data-view="kindling">Kindling</button>
+  </nav>
 
-  <ul id="list" aria-label="Tasks"></ul>
+  <section id="view-today" aria-label="Today">
+    <form id="form-today" autocomplete="off">
+      <input class="field" id="new-today" type="text" placeholder="What needs doing today?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
+    </form>
+    <ul id="list-today" aria-label="Today's tasks"></ul>
+    <p class="note" id="note-today" hidden></p>
+    <div class="foot" id="foot-today" hidden>
+      <span id="left-today"></span>
+      <button type="button" class="link" id="clear-today">Clear finished</button>
+    </div>
+  </section>
 
-  <p class="note" id="note" hidden></p>
-
-  <div class="foot" id="foot" hidden>
-    <span id="count"></span>
-    <button type="button" id="clear">Clear finished</button>
-  </div>
+  <section id="view-kindling" aria-label="Kindling" hidden>
+    <p class="lead">Kindling is what starts the fire. Anything here is added to every new day.</p>
+    <form id="form-kindling" autocomplete="off">
+      <input class="field" id="new-kindling" type="text" placeholder="Something you do every day" aria-label="New kindling item" enterkeyhint="done" maxlength="200">
+    </form>
+    <ul id="list-kindling" aria-label="Kindling items"></ul>
+    <p class="note" id="note-kindling" hidden></p>
+  </section>
 </main>
 
 <script>
 (() => {
-  const KEY = 'ember.v1';
+  const KEY = 'ember.v2';
+  const OLD_KEY = 'ember.v1';
+  const KEEP_DAYS = 730;
   const $ = id => document.getElementById(id);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
   const dayOf = d =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const today = () => dayOf(new Date());
-  const yesterday = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayOf(d); };
+  const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayOf(d); };
+  const yesterday = () => daysAgo(1);
 
+  /* Storage layout (v2). Short keys because this lives in the user's browser.
+     days: { "YYYY-MM-DD": [ { i: id, t: text, d: 0|1, k?: kindlingId, c?: 1 (carried over) } ] }
+     Only days that had tasks are stored. Days older than KEEP_DAYS are dropped. */
   let storageBroken = false;
   let state = load();
+  let view = 'today';
 
+  function fresh() {
+    return { v: 2, theme: 'system', kindling: [], days: {}, streak: { count: 0, best: 0, last: null } };
+  }
   function load() {
     try {
       const s = JSON.parse(localStorage.getItem(KEY));
-      if (s && Array.isArray(s.tasks) && s.streak) return s;
+      if (s && s.v === 2 && s.days && s.streak) return s;
+      const old = JSON.parse(localStorage.getItem(OLD_KEY));
+      if (old && Array.isArray(old.tasks)) {
+        const s2 = fresh();
+        s2.streak = { count: old.streak.count || 0, best: old.streak.best || old.streak.count || 0, last: old.streak.last || null };
+        if (old.tasks.length) s2.days[today()] = old.tasks.map(t => ({ i: t.id, t: t.text, d: t.done ? 1 : 0 }));
+        return s2;
+      }
     } catch { storageBroken = true; }
-    return { tasks: [], streak: { count: 0, best: 0, last: null } };
+    return fresh();
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); storageBroken = false; }
-    catch { storageBroken = true; }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      localStorage.removeItem(OLD_KEY);
+      storageBroken = false;
+    } catch { storageBroken = true; }
   }
 
+  // A new day starts with unfinished one-off tasks carried over, plus every Kindling item.
+  function ensureToday() {
+    const t = today();
+    if (!state.days[t]) {
+      const prev = Object.keys(state.days).filter(k => k < t).sort().pop();
+      const carried = prev
+        ? state.days[prev].filter(x => !x.d && !x.k).map(x => ({ i: uid(), t: x.t, d: 0, c: 1 }))
+        : [];
+      state.days[t] = carried;
+      const cutoff = daysAgo(KEEP_DAYS);
+      for (const k of Object.keys(state.days)) if (k < cutoff) delete state.days[k];
+    }
+    let changed = false;
+    for (const k of state.kindling) {
+      if (!state.days[t].some(x => x.k === k.id)) {
+        state.days[t].push({ i: uid(), t: k.text, d: 0, k: k.id });
+        changed = true;
+      }
+    }
+    return changed;
+  }
+  const todayTasks = () => state.days[today()];
+
   // Streak: finishing at least one task lights the ember for the day.
-  // Finishing something the next day extends it. Skipping a day puts it out.
   function lit() {
     const { count, last } = state.streak;
     return count > 0 && (last === today() || last === yesterday());
@@ -275,150 +405,251 @@
     return true;
   }
 
-  function streakLine() {
-    if (!lit()) {
-      return state.streak.best > 1
-        ? `Ember is out. Best run: ${state.streak.best} days. Finish one thing to relight it`
-        : 'Finish one thing today to light the ember';
-    }
+  /* Theme */
+  function effectiveTheme() {
+    if (state.theme === 'light' || state.theme === 'dark') return state.theme;
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function applyTheme() {
+    const root = document.documentElement;
+    if (state.theme === 'system') root.removeAttribute('data-theme');
+    else root.dataset.theme = state.theme;
+    const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    $('theme').textContent = next === 'dark' ? 'Dim' : 'Bright';
+    $('theme').setAttribute('aria-label', `Switch to ${next} theme`);
+  }
+  $('theme').addEventListener('click', () => {
+    state.theme = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    save();
+    applyTheme();
+  });
+
+  /* Header */
+  function renderHearth() {
+    const isLit = lit();
+    const flame = $('flame');
+    flame.classList.toggle('lit', isLit);
     const n = state.streak.count;
-    const days = `${n} day${n === 1 ? '' : 's'}`;
-    return state.streak.last === today()
-      ? `${days} burning`
-      : `${days} burning. Finish one thing today to keep it`;
+    const count = $('count');
+    count.textContent = isLit ? n : '0';
+    count.classList.toggle('cold', !isLit);
+    let line;
+    if (!isLit) {
+      line = state.streak.best > 1
+        ? `Ember is out. Best run ${state.streak.best} days. Finish one thing to relight it.`
+        : 'Finish one thing today to light the ember.';
+    } else if (state.streak.last === today()) {
+      line = `day${n === 1 ? '' : 's'} burning.`;
+    } else {
+      line = `day${n === 1 ? '' : 's'} burning. Finish one thing today to keep it.`;
+    }
+    $('streak').textContent = line;
+    $('streak').setAttribute('aria-label', isLit ? `${n} ${line}` : line);
   }
 
-  function rowFor(t) {
+  /* Views */
+  function showView(name) {
+    view = name;
+    for (const b of document.querySelectorAll('nav button')) {
+      const on = b.dataset.view === name;
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    }
+    for (const s of document.querySelectorAll('main > section')) s.hidden = s.id !== 'view-' + name;
+    render();
+    const field = document.querySelector('#view-' + name + ' .field');
+    if (field && matchMedia('(hover: hover)').matches) field.focus();
+  }
+  for (const b of document.querySelectorAll('nav button')) b.addEventListener('click', () => showView(b.dataset.view));
+
+  function flameIcon(cls) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', cls);
+    svg.setAttribute('aria-hidden', 'true');
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', '#flame-shape');
+    svg.append(use);
+    return svg;
+  }
+
+  function taskRow(t) {
     const li = document.createElement('li');
-    li.dataset.id = t.id;
-    if (t.done) li.classList.add('done');
+    li.dataset.id = t.i;
+    if (t.d) li.classList.add('done');
 
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'toggle';
-    toggle.setAttribute('aria-pressed', String(t.done));
-    toggle.setAttribute('aria-label', (t.done ? 'Finished: ' : 'Finish: ') + t.text);
+    toggle.setAttribute('aria-pressed', String(!!t.d));
+    toggle.setAttribute('aria-label', (t.d ? 'Finished: ' : 'Finish: ') + t.t + (t.k ? ' (kindling)' : ''));
     const mark = document.createElement('span');
     mark.className = 'mark';
     const text = document.createElement('span');
     text.className = 'text';
-    text.textContent = t.text;
+    text.textContent = t.t;
     toggle.append(mark, text);
-    toggle.addEventListener('click', () => toggleTask(t.id));
+    if (t.k) toggle.append(flameIcon('kindled'));
+    toggle.addEventListener('click', () => toggleTask(t.i));
 
     const rm = document.createElement('button');
     rm.type = 'button';
     rm.className = 'remove';
     rm.textContent = '×';
-    rm.setAttribute('aria-label', 'Remove: ' + t.text);
-    rm.addEventListener('click', () => removeTask(t.id, li));
+    rm.setAttribute('aria-label', 'Remove from today: ' + t.t);
+    rm.addEventListener('click', () => leaveRow(li, () => {
+      state.days[today()] = todayTasks().filter(x => x.i !== t.i);
+      save(); render();
+    }));
 
     li.append(toggle, rm);
     return li;
   }
 
   // FLIP: remember where rows were, re-render, then glide them to where they are now.
-  function render({ enterId } = {}) {
-    const list = $('list');
+  function renderList(list, items, rowFor, enterId) {
     const before = new Map();
-    if (!reduceMotion) {
-      for (const li of list.children) before.set(li.dataset.id, li.getBoundingClientRect().top);
-    }
-
+    if (!reduceMotion) for (const li of list.children) before.set(li.dataset.id, li.getBoundingClientRect().top);
     list.textContent = '';
-    const open = state.tasks.filter(t => !t.done);
-    const done = state.tasks.filter(t => t.done);
-    for (const t of [...open, ...done]) {
+    for (const t of items) {
       const li = rowFor(t);
-      if (t.id === enterId && !reduceMotion) li.classList.add('enter');
+      if (li.dataset.id === enterId && !reduceMotion) li.classList.add('enter');
       list.append(li);
     }
-
-    if (!reduceMotion) {
-      for (const li of list.children) {
-        const was = before.get(li.dataset.id);
-        if (was === undefined) continue;
-        const dy = was - li.getBoundingClientRect().top;
-        if (Math.abs(dy) < 1) continue;
-        li.animate(
-          [{ transform: `translateY(${dy}px)` }, { transform: 'none' }],
-          { duration: 260, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' }
-        );
-      }
+    if (reduceMotion) return;
+    for (const li of list.children) {
+      const was = before.get(li.dataset.id);
+      if (was === undefined) continue;
+      const dy = was - li.getBoundingClientRect().top;
+      if (Math.abs(dy) < 1) continue;
+      li.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }],
+        { duration: 260, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
     }
-
-    const note = $('note');
-    if (storageBroken) {
-      note.textContent = 'Your browser is blocking storage, so this list will vanish when you close the tab. Private window?';
-      note.className = 'note error';
-      note.hidden = false;
-    } else if (state.tasks.length === 0) {
-      note.textContent = 'Nothing on the list. Type one thing above.';
-      note.className = 'note';
-      note.hidden = false;
-    } else {
-      note.hidden = true;
-    }
-
-    $('foot').hidden = state.tasks.length === 0;
-    $('count').textContent = open.length === 0 ? 'All finished' : `${open.length} to go`;
-    $('clear').hidden = done.length === 0;
-
-    $('ember').classList.toggle('lit', lit());
-    $('streak').textContent = streakLine();
   }
-
-  function toggleTask(id) {
-    const t = state.tasks.find(x => x.id === id);
-    if (!t) return;
-    t.done = !t.done;
-    const advanced = t.done && advanceStreak();
-    save();
-    // Let the mark fill before the row glides down.
-    setTimeout(() => {
-      render();
-      if (advanced && !reduceMotion) {
-        const e = $('ember');
-        e.classList.remove('flare'); void e.offsetWidth; e.classList.add('flare');
-      }
-    }, reduceMotion ? 0 : 180);
-    const li = $('list').querySelector(`[data-id="${id}"]`);
-    if (li) li.classList.toggle('done', t.done);
-  }
-
-  function removeTask(id, li) {
-    const finish = () => { state.tasks = state.tasks.filter(x => x.id !== id); save(); render(); };
+  function leaveRow(li, finish) {
     if (reduceMotion) return finish();
     li.classList.add('leave');
     li.addEventListener('animationend', finish, { once: true });
   }
 
-  $('form').addEventListener('submit', e => {
-    e.preventDefault();
-    const input = $('new');
-    const text = input.value.trim();
-    if (!text) return;
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    state.tasks.push({ id, text, done: false });
-    input.value = '';
+  function renderToday(enterId) {
+    const tasks = todayTasks();
+    const open = tasks.filter(t => !t.d);
+    const done = tasks.filter(t => t.d);
+    renderList($('list-today'), [...open, ...done], taskRow, enterId);
+
+    const note = $('note-today');
+    if (storageBroken) {
+      note.textContent = 'Your browser is blocking storage, so this list will vanish when you close the tab. Private window?';
+      note.className = 'note error'; note.hidden = false;
+    } else if (tasks.length === 0) {
+      note.textContent = state.kindling.length
+        ? 'Nothing left for today.'
+        : 'Nothing on the list. Type one thing above.';
+      note.className = 'note'; note.hidden = false;
+    } else note.hidden = true;
+
+    $('foot-today').hidden = tasks.length === 0;
+    $('left-today').textContent = open.length === 0 ? 'All finished' : `${open.length} to go`;
+    $('clear-today').hidden = done.length === 0;
+  }
+
+  function kindlingRow(k) {
+    const li = document.createElement('li');
+    li.dataset.id = k.id;
+    const p = document.createElement('span');
+    p.className = 'plain';
+    p.append(flameIcon('kindled'));
+    const text = document.createElement('span');
+    text.textContent = k.text;
+    p.append(text);
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'remove';
+    rm.textContent = '×';
+    rm.setAttribute('aria-label', 'Remove from kindling: ' + k.text);
+    rm.addEventListener('click', () => leaveRow(li, () => {
+      state.kindling = state.kindling.filter(x => x.id !== k.id);
+      // Drop today's copy too, unless it is already finished.
+      state.days[today()] = todayTasks().filter(x => !(x.k === k.id && !x.d));
+      save(); render();
+    }));
+    li.append(p, rm);
+    return li;
+  }
+  function renderKindling(enterId) {
+    renderList($('list-kindling'), state.kindling, kindlingRow, enterId);
+    const note = $('note-kindling');
+    note.hidden = state.kindling.length > 0;
+    note.textContent = 'Nothing yet. Add the things you want on every day’s list.';
+  }
+
+  function render(opts = {}) {
+    renderHearth();
+    if (view === 'today') renderToday(opts.enterId);
+    if (view === 'kindling') renderKindling(opts.enterId);
+  }
+
+  /* Actions */
+  function toggleTask(id) {
+    const t = todayTasks().find(x => x.i === id);
+    if (!t) return;
+    t.d = t.d ? 0 : 1;
+    const advanced = t.d && advanceStreak();
     save();
-    render({ enterId: id });
+    const li = $('list-today').querySelector(`[data-id="${id}"]`);
+    if (li) li.classList.toggle('done', !!t.d);
+    // Let the mark fill before the row glides down.
+    setTimeout(() => {
+      render();
+      if (advanced && !reduceMotion) {
+        const f = $('flame');
+        f.classList.remove('flare'); void f.offsetWidth; f.classList.add('flare');
+        f.addEventListener('animationend', () => f.classList.remove('flare'), { once: true });
+      }
+    }, reduceMotion ? 0 : 180);
+  }
+
+  function wireForm(formId, inputId, onAdd) {
+    $(formId).addEventListener('submit', e => {
+      e.preventDefault();
+      const input = $(inputId);
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      onAdd(text);
+    });
+    $(inputId).addEventListener('keydown', e => {
+      if (e.key === 'Escape') e.target.value = '';
+      if (e.key === 'Enter') { e.preventDefault(); $(formId).requestSubmit(); }
+    });
+  }
+  wireForm('form-today', 'new-today', text => {
+    const id = uid();
+    todayTasks().push({ i: id, t: text, d: 0 });
+    save(); render({ enterId: id });
   });
-  $('new').addEventListener('keydown', e => {
-    if (e.key === 'Escape') e.target.value = '';
-    if (e.key === 'Enter') { e.preventDefault(); $('form').requestSubmit(); }
+  wireForm('form-kindling', 'new-kindling', text => {
+    const id = uid();
+    state.kindling.push({ id, text });
+    ensureToday();
+    save(); render({ enterId: id });
   });
-  $('clear').addEventListener('click', () => {
-    state.tasks = state.tasks.filter(t => !t.done);
-    save();
+  $('clear-today').addEventListener('click', () => {
+    state.days[today()] = todayTasks().filter(t => !t.d);
+    save(); render();
+    $('new-today').focus();
+  });
+
+  // Midnight can pass while the tab sits open: roll the day and let the ember go out.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    if (ensureToday()) save();
     render();
-    $('new').focus();
   });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
-  // The ember can go out overnight while the tab sits open.
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
-
-  render();
+  if (ensureToday()) save();
+  applyTheme();
+  showView('today');
 })();
 </script>
 </body>
