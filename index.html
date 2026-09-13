@@ -220,8 +220,8 @@
     transition: transform 0.25s var(--ease);
   }
   li.done .text::after { transform: scaleX(1); }
-  /* A small flame marks a task that came from Kindling. */
-  .kindled {
+  /* A small flame marks a task that came from Fuel. */
+  .fuel-mark {
     width: 14px; height: 14px;
     flex: none;
     fill: none;
@@ -371,7 +371,7 @@
 
   <nav aria-label="Views">
     <button type="button" data-view="today">Today</button>
-    <button type="button" data-view="kindling">Kindling</button>
+    <button type="button" data-view="fuel">Fuel</button>
     <button type="button" data-view="history">History</button>
     <button type="button" data-view="data">Data</button>
   </nav>
@@ -388,13 +388,13 @@
     </div>
   </section>
 
-  <section id="view-kindling" aria-label="Kindling" hidden>
-    <p class="lead">Kindling is what starts the fire. Anything here is added to every new day.</p>
-    <form id="form-kindling" autocomplete="off">
-      <input class="field" id="new-kindling" type="text" placeholder="Something you do every day" aria-label="New kindling item" enterkeyhint="done" maxlength="200">
+  <section id="view-fuel" aria-label="Fuel" hidden>
+    <p class="lead">Fuel is what you feed the fire every day. Anything here is on every new day’s list.</p>
+    <form id="form-fuel" autocomplete="off">
+      <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New fuel item" enterkeyhint="done" maxlength="200">
     </form>
-    <ul id="list-kindling" aria-label="Kindling items"></ul>
-    <p class="note" id="note-kindling" hidden></p>
+    <ul id="list-fuel" aria-label="Fuel items"></ul>
+    <p class="note" id="note-fuel" hidden></p>
   </section>
 
   <section id="view-history" aria-label="History" hidden>
@@ -423,7 +423,7 @@
 
 <dialog id="consent" aria-labelledby="consent-title">
   <h2 id="consent-title">Ember keeps your list on this device</h2>
-  <p>Your tasks, Kindling, streak, and theme are saved in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
+  <p>Your tasks, Fuel, streak, and theme are saved in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
   <p>You can export or erase all of it any time from the Data view.</p>
   <form method="dialog">
     <button type="submit" value="yes" class="primary">Keep it on this device</button>
@@ -447,19 +447,23 @@
   const yesterday = () => daysAgo(1);
 
   /* Storage layout (v2). Short keys because this lives in the user's browser.
-     days: { "YYYY-MM-DD": [ { i: id, t: text, d: 0|1, k?: kindlingId, c?: 1 (carried over) } ] }
+     days: { "YYYY-MM-DD": [ { i: id, t: text, d: 0|1, k?: fuelId, c?: 1 (carried over) } ] }
      Only days that had tasks are stored. Days older than KEEP_DAYS are dropped. */
   let storageBroken = false;
   let state = load();
   let view = 'today';
 
   function fresh() {
-    return { v: 2, theme: 'system', kindling: [], days: {}, streak: { count: 0, best: 0, last: null } };
+    return { v: 2, theme: 'system', fuel: [], days: {}, streak: { count: 0, best: 0, last: null } };
   }
   function load() {
     try {
       const s = JSON.parse(localStorage.getItem(KEY));
-      if (s && s.v === 2 && s.days && s.streak) return s;
+      if (s && s.v === 2 && s.days && s.streak) {
+        if (s.kindling) { s.fuel = s.kindling; delete s.kindling; }
+        s.fuel = s.fuel || [];
+        return s;
+      }
       const old = JSON.parse(localStorage.getItem(OLD_KEY));
       if (old && Array.isArray(old.tasks)) {
         const s2 = fresh();
@@ -480,7 +484,7 @@
     } catch { storageBroken = true; }
   }
 
-  // A new day starts with unfinished one-off tasks carried over, plus every Kindling item.
+  // A new day starts with unfinished one-off tasks carried over, plus every Fuel item.
   function ensureToday() {
     const t = today();
     if (!state.days[t]) {
@@ -493,7 +497,7 @@
       for (const k of Object.keys(state.days)) if (k < cutoff) delete state.days[k];
     }
     let changed = false;
-    for (const k of state.kindling) {
+    for (const k of state.fuel) {
       if (!state.days[t].some(x => x.k === k.id)) {
         state.days[t].push({ i: uid(), t: k.text, d: 0, k: k.id });
         changed = true;
@@ -592,14 +596,14 @@
     toggle.type = 'button';
     toggle.className = 'toggle';
     toggle.setAttribute('aria-pressed', String(!!t.d));
-    toggle.setAttribute('aria-label', (t.d ? 'Finished: ' : 'Finish: ') + t.t + (t.k ? ' (kindling)' : ''));
+    toggle.setAttribute('aria-label', (t.d ? 'Finished: ' : 'Finish: ') + t.t + (t.k ? ' (fuel)' : ''));
     const mark = document.createElement('span');
     mark.className = 'mark';
     const text = document.createElement('span');
     text.className = 'text';
     text.textContent = t.t;
     toggle.append(mark, text);
-    if (t.k) toggle.append(flameIcon('kindled'));
+    if (t.k) toggle.append(flameIcon('fuel-mark'));
     toggle.addEventListener('click', () => toggleTask(t.i));
 
     const rm = document.createElement('button');
@@ -656,7 +660,7 @@
       note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Data.';
       note.className = 'note error'; note.hidden = false;
     } else if (tasks.length === 0) {
-      note.textContent = state.kindling.length
+      note.textContent = state.fuel.length
         ? 'Nothing left for today.'
         : 'Nothing on the list. Type one thing above.';
       note.className = 'note'; note.hidden = false;
@@ -667,12 +671,12 @@
     $('clear-today').hidden = done.length === 0;
   }
 
-  function kindlingRow(k) {
+  function fuelRow(k) {
     const li = document.createElement('li');
     li.dataset.id = k.id;
     const p = document.createElement('span');
     p.className = 'plain';
-    p.append(flameIcon('kindled'));
+    p.append(flameIcon('fuel-mark'));
     const text = document.createElement('span');
     text.textContent = k.text;
     p.append(text);
@@ -680,9 +684,9 @@
     rm.type = 'button';
     rm.className = 'remove';
     rm.textContent = '×';
-    rm.setAttribute('aria-label', 'Remove from kindling: ' + k.text);
+    rm.setAttribute('aria-label', 'Remove from fuel: ' + k.text);
     rm.addEventListener('click', () => leaveRow(li, () => {
-      state.kindling = state.kindling.filter(x => x.id !== k.id);
+      state.fuel = state.fuel.filter(x => x.id !== k.id);
       // Drop today's copy too, unless it is already finished.
       state.days[today()] = todayTasks().filter(x => !(x.k === k.id && !x.d));
       save(); render();
@@ -690,10 +694,10 @@
     li.append(p, rm);
     return li;
   }
-  function renderKindling(enterId) {
-    renderList($('list-kindling'), state.kindling, kindlingRow, enterId);
-    const note = $('note-kindling');
-    note.hidden = state.kindling.length > 0;
+  function renderFuel(enterId) {
+    renderList($('list-fuel'), state.fuel, fuelRow, enterId);
+    const note = $('note-fuel');
+    note.hidden = state.fuel.length > 0;
     note.textContent = 'Nothing yet. Add the things you want on every day’s list.';
   }
 
@@ -769,7 +773,7 @@
         text.textContent = x.t;
         p.append(mark, text);
         p.setAttribute('aria-label', (x.d ? 'Finished: ' : 'Not finished: ') + x.t);
-        if (x.k) p.append(flameIcon('kindled'));
+        if (x.k) p.append(flameIcon('fuel-mark'));
         li.append(p);
         ul.append(li);
       }
@@ -815,7 +819,7 @@
     renderData('Exported. The file holds every task, day, and the streak, as JSON.');
   });
   $('data-erase').addEventListener('click', () => {
-    if (!confirm('Erase every task, Kindling item, past day, and the streak from this browser? This cannot be undone.')) return;
+    if (!confirm('Erase every task, Fuel item, past day, and the streak from this browser? This cannot be undone.')) return;
     const consent = state.consent;
     state = fresh();
     state.consent = consent;
@@ -830,7 +834,7 @@
   function render(opts = {}) {
     renderHearth();
     if (view === 'today') renderToday(opts.enterId);
-    if (view === 'kindling') renderKindling(opts.enterId);
+    if (view === 'fuel') renderFuel(opts.enterId);
     if (view === 'history') renderHistory();
     if (view === 'data') renderData();
   }
@@ -886,9 +890,9 @@
     todayTasks().push({ i: id, t: text, d: 0 });
     save(); render({ enterId: id });
   });
-  wireForm('form-kindling', 'new-kindling', text => {
+  wireForm('form-fuel', 'new-fuel', text => {
     const id = uid();
-    state.kindling.push({ id, text });
+    state.fuel.push({ id, text });
     ensureToday();
     save(); render({ enterId: id });
   });
