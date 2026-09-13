@@ -90,7 +90,7 @@
   }
   .flame .outer { fill: none; stroke: var(--muted); stroke-width: 1.75; stroke-linejoin: round; }
   .flame .inner { fill: var(--paper); opacity: 0; }
-  .flame.lit { filter: drop-shadow(0 0 8px var(--ember-glow)); }
+  .flame.lit { filter: drop-shadow(0 0 var(--glow, 8px) var(--ember-glow)); }
   .flame.lit .outer { fill: var(--ember); stroke: var(--ember); animation: flicker 2.8s ease-in-out infinite; }
   .flame.lit .inner { opacity: 0.85; animation: flicker 1.9s ease-in-out infinite reverse; }
   @keyframes flicker {
@@ -192,15 +192,15 @@
     border: 0;
     border-bottom: 2px solid var(--line);
     border-radius: 0;
-    background: transparent;
+    background: linear-gradient(var(--ember), var(--ember)) left bottom / 0% 2px no-repeat;
     color: var(--ink);
     font: inherit;
     font-size: 1.25rem;
     outline: none;
-    transition: border-color 0.2s var(--ease);
+    transition: background-size 0.3s var(--ease);
   }
   .field::placeholder { color: var(--muted); opacity: 1; }
-  .field:focus-visible { border-bottom-color: var(--ember); }
+  .field:focus-visible { background-size: 100% 2px; }
 
   /* Rows: hairlines separate tasks. No cards. */
   ul { list-style: none; margin: 0; padding: 0; }
@@ -272,14 +272,13 @@
     border-radius: 50%;
     background: var(--ember);
     pointer-events: none;
-    animation: spark 0.65s var(--ease) forwards;
+    animation: spark 0.5s var(--ease) forwards;
   }
   @keyframes spark {
     from { transform: translate(0, 0) scale(1); opacity: 1; }
     to   { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
   }
-  main > section.view-in { animation: viewIn 0.2s var(--ease); }
-  @keyframes viewIn { from { opacity: 0; transform: translateY(4px); } }
+
   /* A small flame marks a task that came from Fuel. */
   .fuel-mark {
     width: 14px; height: 14px;
@@ -400,8 +399,8 @@
   }
   .strip .day-dot {
     width: 100%; max-width: 12px; aspect-ratio: 1; height: auto; justify-self: center;
-    animation: dotIn 0.35s var(--ease) both;
-    animation-delay: calc(var(--i, 0) * 12ms);
+    animation: dotIn 0.3s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 8ms);
   }
   @keyframes dotIn { from { opacity: 0; transform: scale(0.4); } }
   .day-dot.some { border-color: var(--muted); }
@@ -732,10 +731,6 @@
     }
     for (const s of document.querySelectorAll('main > section')) {
       const on = s.id === 'view-' + name;
-      if (on && s.hidden && !reduceMotion) {
-        s.classList.add('view-in');
-        s.addEventListener('animationend', () => s.classList.remove('view-in'), { once: true });
-      }
       s.hidden = !on;
     }
     render();
@@ -833,6 +828,8 @@
       note.className = 'note'; note.hidden = false;
     } else note.hidden = true;
 
+    const ratio = tasks.length ? done.length / tasks.length : 0;
+    $('flame').style.setProperty('--glow', (6 + 12 * ratio).toFixed(1) + 'px');
     $('foot-today').hidden = tasks.length === 0;
     $('left-today').textContent = open.length === 0 ? 'All finished' : `${open.length} to go`;
     $('clear-today').hidden = done.length === 0;
@@ -1043,7 +1040,7 @@
   }
 
   function sparks(mark) {
-    const offsets = [[-16, -20], [12, -24], [20, -6], [-6, -28], [-22, -4]];
+    const offsets = [[-14, -18], [10, -22], [18, -6]];
     for (const [dx, dy] of offsets) {
       const i = document.createElement('i');
       i.className = 'sp';
