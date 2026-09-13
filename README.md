@@ -15,6 +15,12 @@ The one extra: a streak. Finish everything on the day's list and the flame at th
 
 The line beside the flame changes with your streak, from "Light it up." to "Nothing puts you out."
 
+## Install it as an app
+
+Ember is a web app that installs like a native one, with no store in between. Open the site, go to Settings, and follow the Install row: it shows an Install button where the browser offers one (Chrome, Edge, Android), and the Share then Add to Home Screen steps on iPhone and iPad. Once installed it opens full screen from the home screen and works offline.
+
+For that to work the site has to be served over https. GitHub Pages does this for free: in the repository settings, under Pages, choose the main branch and the root folder.
+
 ## Run it
 
 Open `index.html` in a browser. That is the whole install.
