@@ -236,6 +236,22 @@
     transition: transform 0.25s var(--ease);
   }
   li.done .text::after { transform: scaleX(1); }
+  /* Sparks fly off the mark when a task is finished. Transform and opacity only. */
+  .sp {
+    position: absolute;
+    left: 7px; top: 7px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--ember);
+    pointer-events: none;
+    animation: spark 0.65s var(--ease) forwards;
+  }
+  @keyframes spark {
+    from { transform: translate(0, 0) scale(1); opacity: 1; }
+    to   { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
+  }
+  main > section.view-in { animation: viewIn 0.2s var(--ease); }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(4px); } }
   /* A small flame marks a task that came from Fuel. */
   .fuel-mark {
     width: 14px; height: 14px;
@@ -354,7 +370,12 @@
     border-radius: 50%;
     border: 2px solid var(--line);
   }
-  .strip .day-dot { width: 100%; max-width: 12px; aspect-ratio: 1; height: auto; justify-self: center; }
+  .strip .day-dot {
+    width: 100%; max-width: 12px; aspect-ratio: 1; height: auto; justify-self: center;
+    animation: dotIn 0.35s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 12ms);
+  }
+  @keyframes dotIn { from { opacity: 0; transform: scale(0.4); } }
   .day-dot.some { border-color: var(--muted); }
   .day-dot.lit { background: var(--ember); border-color: var(--ember); }
   .day-dot.today { outline: 2px solid var(--muted); outline-offset: 2px; }
@@ -671,7 +692,14 @@
       const on = b.dataset.view === name;
       if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     }
-    for (const s of document.querySelectorAll('main > section')) s.hidden = s.id !== 'view-' + name;
+    for (const s of document.querySelectorAll('main > section')) {
+      const on = s.id === 'view-' + name;
+      if (on && s.hidden && !reduceMotion) {
+        s.classList.add('view-in');
+        s.addEventListener('animationend', () => s.classList.remove('view-in'), { once: true });
+      }
+      s.hidden = !on;
+    }
     render();
     const field = document.querySelector('#view-' + name + ' .field');
     if (field && matchMedia('(hover: hover)').matches) field.focus();
@@ -828,6 +856,7 @@
       const dot = document.createElement('span');
       dot.className = 'day-dot';
       if (n === 0) dot.classList.add('today');
+      dot.style.setProperty('--i', 29 - n);
       if (tasks && tasks.length) {
         dot.classList.add('some');
         if (tasks.some(x => x.d)) { dot.classList.add('lit'); litDays++; }
@@ -960,7 +989,10 @@
     const advanced = t.d && advanceStreak();
     save();
     const li = $('list-today').querySelector(`[data-id="${id}"]`);
-    if (li) li.classList.toggle('done', !!t.d);
+    if (li) {
+      li.classList.toggle('done', !!t.d);
+      if (t.d && !reduceMotion) sparks(li.querySelector('.mark'));
+    }
     // Let the mark fill before the row glides down.
     setTimeout(() => {
       render();
@@ -970,6 +1002,18 @@
         f.addEventListener('animationend', () => f.classList.remove('flare'), { once: true });
       }
     }, reduceMotion ? 0 : 180);
+  }
+
+  function sparks(mark) {
+    const offsets = [[-16, -20], [12, -24], [20, -6], [-6, -28], [-22, -4]];
+    for (const [dx, dy] of offsets) {
+      const i = document.createElement('i');
+      i.className = 'sp';
+      i.style.setProperty('--dx', dx + 'px');
+      i.style.setProperty('--dy', dy + 'px');
+      i.addEventListener('animationend', () => i.remove(), { once: true });
+      mark.append(i);
+    }
   }
 
   function wireForm(formId, inputId, onAdd) {
