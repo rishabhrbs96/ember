@@ -379,6 +379,38 @@
   .day-tasks li.done .mark { background: var(--ember); border-color: var(--ember); }
   .day-tasks li.done .mark::after { transform: rotate(45deg) scale(1); }
 
+  /* Size ranges. Type scales with the device; the column widens a little on big screens. */
+  @media (max-width: 400px) {
+    html { font-size: 93.75%; }
+    main { padding: 1rem 0.9rem 4rem; }
+    nav { gap: 0.9rem; }
+  }
+  @media (max-width: 290px) {
+    html { font-size: 87.5%; }
+    main { padding: 0.6rem 0.6rem 3rem; }
+    header { margin-bottom: 0.75rem; }
+    .brand { font-size: 1.35rem; }
+    .flame { width: 28px; height: 28px; }
+    .slogan { margin-bottom: 0.6rem; }
+    nav { flex-wrap: wrap; gap: 0 0.75rem; margin-bottom: 1rem; }
+    nav button { min-height: 40px; }
+    .toggle, .plain { min-height: 44px; gap: 0.6rem; }
+    .strip { gap: 2px; }
+    .facts div { flex-wrap: wrap; }
+    .remove { opacity: 1; }
+  }
+  @media (min-width: 900px) {
+    html { font-size: 106.25%; }
+    main { max-width: 32rem; }
+  }
+  @media (min-width: 1600px) {
+    html { font-size: 118.75%; }
+    main { max-width: 34rem; padding-top: 6rem; }
+  }
+  @media (max-height: 500px) {
+    main { padding-top: 0.75rem; padding-bottom: 2rem; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
