@@ -341,28 +341,42 @@
   .facts dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
   .actions { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
   .small { color: var(--muted); font-size: 0.9375rem; margin: 1.5rem 0 0; }
+  /* Dialogs are unmistakably dialogs: a bordered panel over a darkened, blurred page,
+     a title, the question, and the actions on their own row with the primary on the right. */
   dialog {
     width: min(26rem, calc(100vw - 2rem));
-    padding: 1.5rem;
-    border: 0;
-    border-radius: 6px;
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 10px;
     background: var(--paper);
     color: var(--ink);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.04);
   }
-  dialog::backdrop { background: rgba(20, 18, 16, 0.55); }
+  dialog::backdrop { background: rgba(20, 18, 16, 0.6); backdrop-filter: blur(3px); }
+  dialog[open] { animation: dialogIn 0.22s var(--ease); }
+  @keyframes dialogIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+  .dialog-body { padding: 1.5rem 1.5rem 0.5rem; }
   dialog h2 { font-size: 1.2rem; margin: 0 0 0.75rem; }
   dialog p { margin: 0 0 0.75rem; color: var(--muted); }
-  dialog form { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center; margin: 1.25rem 0 0; }
-  .primary {
+  dialog form {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem 1.25rem;
+    margin: 0.5rem 0 0;
+    border-top: 1px solid var(--line);
+  }
+  .primary, .secondary {
     min-height: 44px;
     padding: 0 1.1rem;
-    border: 0;
-    border-radius: 4px;
-    background: var(--ink);
-    color: var(--paper);
+    border-radius: 6px;
     cursor: pointer;
   }
+  .primary { border: 1px solid var(--ink); background: var(--ink); color: var(--paper); }
+  .primary.danger { border-color: var(--ember); background: var(--ember); color: #fff; }
+  .secondary { border: 1px solid var(--line); background: none; color: var(--ink); }
+  .secondary:hover { border-color: var(--muted); }
 
   .note { color: var(--muted); margin: 2.5rem 0 0; text-align: center; }
   .note.error { color: var(--ink); }
@@ -613,12 +627,25 @@
 </main>
 
 <dialog id="consent" aria-labelledby="consent-title">
-  <h2 id="consent-title">Ember keeps your list on this device</h2>
-  <p>Your tasks, Fuel, streak, and theme are saved in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
-  <p>You can export or erase all of it any time under Settings.</p>
+  <div class="dialog-body">
+    <h2 id="consent-title">Keep your list on this device?</h2>
+    <p>Ember saves your tasks, Fuel, streak, and theme in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
+    <p>You can export or erase all of it any time under Settings.</p>
+  </div>
   <form method="dialog">
-    <button type="submit" value="yes" class="primary">Keep it on this device</button>
-    <button type="submit" value="no" class="link">Not now</button>
+    <button type="submit" value="no" class="secondary">Not now</button>
+    <button type="submit" value="yes" class="primary">Yes, keep it here</button>
+  </form>
+</dialog>
+
+<dialog id="confirm" aria-labelledby="confirm-title">
+  <div class="dialog-body">
+    <h2 id="confirm-title"></h2>
+    <p id="confirm-text"></p>
+  </div>
+  <form method="dialog">
+    <button type="submit" value="no" class="secondary" id="confirm-no">Cancel</button>
+    <button type="submit" value="yes" class="primary danger" id="confirm-yes"></button>
   </form>
 </dialog>
 
@@ -1078,8 +1105,9 @@
     note.hidden = !message;
     note.textContent = message || '';
   }
-  $('data-toggle').addEventListener('click', () => {
+  $('data-toggle').addEventListener('click', async () => {
     if (state.consent) {
+      if (!await ask('Stop saving to this device?', 'The saved copy is removed from this browser. This session’s list stays until you close the tab.', 'Stop saving')) return;
       state.consent = null;
       try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); } catch {}
       renderData('Stopped. The saved copy was removed from this browser. This session’s list lasts until you close the tab.');
@@ -1100,8 +1128,8 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     renderData('Exported. The file holds every task, day, and the streak, as JSON.');
   });
-  $('data-erase').addEventListener('click', () => {
-    if (!confirm('Erase every task, Fuel item, past day, and the streak from this browser? This cannot be undone.')) return;
+  $('data-erase').addEventListener('click', async () => {
+    if (!await ask('Erase everything?', 'Every task, Fuel item, past day, and the streak will be removed from this browser. This cannot be undone.', 'Erase everything')) return;
     const consent = state.consent;
     state = fresh();
     state.consent = consent;
@@ -1121,6 +1149,22 @@
     if (view === 'settings') renderData();
   }
 
+  /* A real dialog instead of the browser's confirm(). Resolves true only on the primary button. */
+  function ask(title, text, yesLabel) {
+    return new Promise(resolve => {
+      const dlg = $('confirm');
+      $('confirm-title').textContent = title;
+      $('confirm-text').textContent = text;
+      $('confirm-yes').textContent = yesLabel;
+      dlg.addEventListener('close', () => resolve(dlg.returnValue === 'yes'), { once: true });
+      dlg.showModal();
+      $('confirm-no').focus();
+    });
+  }
+  for (const dlg of document.querySelectorAll('dialog')) {
+    dlg.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); dlg.close('no'); } });
+  }
+
   /* First run: ask before keeping anything. Escape counts as "not now". */
   function askConsent() {
     const dlg = $('consent');
@@ -1129,7 +1173,6 @@
       render();
       if (matchMedia('(hover: hover)').matches) $('new-today').focus();
     }, { once: true });
-    dlg.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); dlg.close('no'); } });
     dlg.showModal();
   }
 
