@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="A todo list that is only as complicated as a list needs to be. Stays in your browser.">
+<title>Ember</title>
+<style>
+  :root {
+    --paper: #faf7f2;
+    --ink: #1d1a17;
+    --muted: #6e665e;
+    --line: #e6e0d8;
+    --ember: #c9501c;
+    --ember-glow: rgba(201, 80, 28, 0.35);
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141210;
+      --ink: #efe9e2;
+      --muted: #a39b92;
+      --line: #2a2622;
+      --ember: #ff7a3d;
+      --ember-glow: rgba(255, 122, 61, 0.4);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font: 1.0625rem/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+
+  main {
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: clamp(2rem, 8vh, 5rem) 1.25rem 8rem;
+  }
+
+  /* Header: the ember and the streak line. The only place the accent glows. */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2rem;
+    margin-bottom: 2rem;
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+  .ember {
+    width: 14px; height: 14px;
+    flex: none;
+    border-radius: 50%;
+    border: 2px solid var(--muted);
+    background: transparent;
+    transition: background 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  }
+  .ember.lit {
+    background: var(--ember);
+    border-color: var(--ember);
+    box-shadow: 0 0 12px 3px var(--ember-glow);
+  }
+  .ember.flare { animation: flare 0.6s var(--ease); }
+  @keyframes flare {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.7); box-shadow: 0 0 22px 8px var(--ember-glow); }
+    100% { transform: scale(1); }
+  }
+
+  /* Input: an underline, nothing else. Focus is the accent's second job. */
+  form { margin-bottom: 0.5rem; }
+  #new {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem 0;
+    border: 0;
+    border-bottom: 2px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.25rem;
+    outline: none;
+    transition: border-color 0.2s var(--ease);
+  }
+  #new::placeholder { color: var(--muted); opacity: 1; }
+  #new:focus-visible { border-bottom-color: var(--ember); }
+
+  /* Rows: hairlines separate tasks. No cards. */
+  ul { list-style: none; margin: 0; padding: 0; }
+  li {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--line);
+    will-change: transform;
+  }
+  li.enter { animation: enter 0.22s var(--ease); }
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: none; }
+  }
+  li.leave {
+    animation: leave 0.2s var(--ease) forwards;
+    pointer-events: none;
+  }
+  @keyframes leave {
+    to { opacity: 0; transform: translateX(12px); }
+  }
+
+  .toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 52px;
+    padding: 0.6rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+    transition: color 0.25s var(--ease);
+  }
+  .mark {
+    width: 20px; height: 20px;
+    flex: none;
+    border-radius: 50%;
+    border: 2px solid var(--muted);
+    position: relative;
+    transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+  }
+  .mark::after {
+    content: "";
+    position: absolute;
+    left: 5px; top: 2px;
+    width: 5px; height: 9px;
+    border: solid var(--paper);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.2s var(--ease);
+  }
+  li.done .toggle { color: var(--muted); }
+  li.done .mark { background: var(--ember); border-color: var(--ember); }
+  li.done .mark::after { transform: rotate(45deg) scale(1); }
+  .text { position: relative; }
+  .text::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 55%;
+    height: 1.5px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s var(--ease);
+  }
+  li.done .text::after { transform: scaleX(1); }
+
+  .remove {
+    width: 44px;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s var(--ease), color 0.15s var(--ease);
+  }
+  li:hover .remove, li:focus-within .remove, li.done .remove { opacity: 1; }
+  .remove:hover { color: var(--ink); }
+  @media (hover: none) { .remove { opacity: 1; } }
+
+  :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 3px; }
+
+  .note {
+    color: var(--muted);
+    margin: 2.5rem 0 0;
+    text-align: center;
+  }
+  .note.error { color: var(--ink); }
+
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+  .foot button {
+    min-height: 44px;
+    padding: 0 0.25rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .foot button:hover { color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="ember" id="ember" aria-hidden="true"></span>
+    <span id="streak" role="status"></span>
+  </header>
+
+  <form id="form" autocomplete="off">
+    <input id="new" type="text" placeholder="What needs doing?" aria-label="New task" autofocus enterkeyhint="done" maxlength="200">
+  </form>
+
+  <ul id="list" aria-label="Tasks"></ul>
+
+  <p class="note" id="note" hidden></p>
+
+  <div class="foot" id="foot" hidden>
+    <span id="count"></span>
+    <button type="button" id="clear">Clear finished</button>
+  </div>
+</main>
+
+<script>
+(() => {
+  const KEY = 'ember.v1';
+  const $ = id => document.getElementById(id);
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const dayOf = d =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const today = () => dayOf(new Date());
+  const yesterday = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayOf(d); };
+
+  let storageBroken = false;
+  let state = load();
+
+  function load() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY));
+      if (s && Array.isArray(s.tasks) && s.streak) return s;
+    } catch { storageBroken = true; }
+    return { tasks: [], streak: { count: 0, best: 0, last: null } };
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); storageBroken = false; }
+    catch { storageBroken = true; }
+  }
+
+  // Streak: finishing at least one task lights the ember for the day.
+  // Finishing something the next day extends it. Skipping a day puts it out.
+  function lit() {
+    const { count, last } = state.streak;
+    return count > 0 && (last === today() || last === yesterday());
+  }
+  function advanceStreak() {
+    const s = state.streak;
+    if (s.last === today()) return false;
+    s.count = s.last === yesterday() ? s.count + 1 : 1;
+    s.best = Math.max(s.best || 0, s.count);
+    s.last = today();
+    return true;
+  }
+
+  function streakLine() {
+    if (!lit()) {
+      return state.streak.best > 1
+        ? `Ember is out. Best run: ${state.streak.best} days. Finish one thing to relight it`
+        : 'Finish one thing today to light the ember';
+    }
+    const n = state.streak.count;
+    const days = `${n} day${n === 1 ? '' : 's'}`;
+    return state.streak.last === today()
+      ? `${days} burning`
+      : `${days} burning. Finish one thing today to keep it`;
+  }
+
+  function rowFor(t) {
+    const li = document.createElement('li');
+    li.dataset.id = t.id;
+    if (t.done) li.classList.add('done');
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'toggle';
+    toggle.setAttribute('aria-pressed', String(t.done));
+    toggle.setAttribute('aria-label', (t.done ? 'Finished: ' : 'Finish: ') + t.text);
+    const mark = document.createElement('span');
+    mark.className = 'mark';
+    const text = document.createElement('span');
+    text.className = 'text';
+    text.textContent = t.text;
+    toggle.append(mark, text);
+    toggle.addEventListener('click', () => toggleTask(t.id));
+
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'remove';
+    rm.textContent = '×';
+    rm.setAttribute('aria-label', 'Remove: ' + t.text);
+    rm.addEventListener('click', () => removeTask(t.id, li));
+
+    li.append(toggle, rm);
+    return li;
+  }
+
+  // FLIP: remember where rows were, re-render, then glide them to where they are now.
+  function render({ enterId } = {}) {
+    const list = $('list');
+    const before = new Map();
+    if (!reduceMotion) {
+      for (const li of list.children) before.set(li.dataset.id, li.getBoundingClientRect().top);
+    }
+
+    list.textContent = '';
+    const open = state.tasks.filter(t => !t.done);
+    const done = state.tasks.filter(t => t.done);
+    for (const t of [...open, ...done]) {
+      const li = rowFor(t);
+      if (t.id === enterId && !reduceMotion) li.classList.add('enter');
+      list.append(li);
+    }
+
+    if (!reduceMotion) {
+      for (const li of list.children) {
+        const was = before.get(li.dataset.id);
+        if (was === undefined) continue;
+        const dy = was - li.getBoundingClientRect().top;
+        if (Math.abs(dy) < 1) continue;
+        li.animate(
+          [{ transform: `translateY(${dy}px)` }, { transform: 'none' }],
+          { duration: 260, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' }
+        );
+      }
+    }
+
+    const note = $('note');
+    if (storageBroken) {
+      note.textContent = 'Your browser is blocking storage, so this list will vanish when you close the tab. Private window?';
+      note.className = 'note error';
+      note.hidden = false;
+    } else if (state.tasks.length === 0) {
+      note.textContent = 'Nothing on the list. Type one thing above.';
+      note.className = 'note';
+      note.hidden = false;
+    } else {
+      note.hidden = true;
+    }
+
+    $('foot').hidden = state.tasks.length === 0;
+    $('count').textContent = open.length === 0 ? 'All finished' : `${open.length} to go`;
+    $('clear').hidden = done.length === 0;
+
+    $('ember').classList.toggle('lit', lit());
+    $('streak').textContent = streakLine();
+  }
+
+  function toggleTask(id) {
+    const t = state.tasks.find(x => x.id === id);
+    if (!t) return;
+    t.done = !t.done;
+    const advanced = t.done && advanceStreak();
+    save();
+    // Let the mark fill before the row glides down.
+    setTimeout(() => {
+      render();
+      if (advanced && !reduceMotion) {
+        const e = $('ember');
+        e.classList.remove('flare'); void e.offsetWidth; e.classList.add('flare');
+      }
+    }, reduceMotion ? 0 : 180);
+    const li = $('list').querySelector(`[data-id="${id}"]`);
+    if (li) li.classList.toggle('done', t.done);
+  }
+
+  function removeTask(id, li) {
+    const finish = () => { state.tasks = state.tasks.filter(x => x.id !== id); save(); render(); };
+    if (reduceMotion) return finish();
+    li.classList.add('leave');
+    li.addEventListener('animationend', finish, { once: true });
+  }
+
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = $('new');
+    const text = input.value.trim();
+    if (!text) return;
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    state.tasks.push({ id, text, done: false });
+    input.value = '';
+    save();
+    render({ enterId: id });
+  });
+  $('new').addEventListener('keydown', e => {
+    if (e.key === 'Escape') e.target.value = '';
+    if (e.key === 'Enter') { e.preventDefault(); $('form').requestSubmit(); }
+  });
+  $('clear').addEventListener('click', () => {
+    state.tasks = state.tasks.filter(t => !t.done);
+    save();
+    render();
+    $('new').focus();
+  });
+
+  // The ember can go out overnight while the tab sits open.
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+
+  render();
+})();
+</script>
+</body>
+</html>
