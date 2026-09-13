@@ -17,13 +17,13 @@ Reading this as: a single-screen personal utility for one person, in a warm ultr
 
 ## Identity motif (owner direction, agent execution)
 
-Fire. A flame at the top: filled, glowing, and flickering while the streak is alive, an outline when it is out. Beside it the streak numeral. A small outline flame marks tasks that came from Kindling. History shows each day as a small ember, lit or not. Lit and cold always differ in shape as well as colour.
+Fire. The wordmark is the flame plus the name. The flame has two layers: an outer tongue and a paler inner one, each flickering at its own pace while the streak is alive, an outline when it is out. Under it, one line addressed to the person that changes with the streak ("Light it up." through "Nothing puts you out."), then the streak numeral. A small outline flame marks tasks that came from Fuel. History shows each day as a small ember, lit or not. Finishing a task throws five sparks off the mark. Lit and cold always differ in shape as well as colour.
 
 The orange is used for: the lit flame, a finished task's mark, lit day embers, the active view's underline, and keyboard focus. Nowhere else.
 
 ## Vocabulary
 
-- Kindling: the recurring list that starts every day. Chosen over "master list" because it says what the list is for, not what it is.
+- Fuel: the recurring list that goes on every day. Chosen over "master list" and "kindling" because everyone knows what fuel does to a fire.
 - Lit / out: the streak states. "Burning" for the count line.
 - Dim / Bright: the theme switch labels. They name the action, not the mode.
 
@@ -62,7 +62,19 @@ One column, max 30rem wide, generous top margin. Rows are separated by hairlines
 
 ## Views
 
-One screen, four tabs as plain text: Today, Kindling, History, Data. Today is default because the app's whole job is today. Tabs are text, not icons, because four words are clearer than four glyphs at this size.
+One screen, four tabs as plain text: Today, Fuel, History, Settings. Today is default because the app's whole job is today. Tabs are text, not icons, because four words are clearer than four glyphs at this size.
+
+## Sizes
+
+Type scales with the device through the root font size: 87.5% under 290px (watches), 93.75% under 400px (phones), 106.25% above 900px, 118.75% above 1600px. The column widens from 30rem to 34rem on wide screens. Nav wraps on watches. Nothing else changes shape, because the layout is one column everywhere.
+
+## Motion budget
+
+Every animation is transform or opacity only, so it runs on the compositor. Sparks are five 4px elements that live for 650ms. The history strip staggers 30 dots over 360ms. View switches fade for 200ms. The flame flicker is the only loop. All of it is off under prefers-reduced-motion.
+
+## Sample data
+
+Settings offers a labelled sample set so every view can be seen at once. A banner stays visible until it is erased, so made-up days are never mistaken for real ones.
 
 ## Data and consent
 

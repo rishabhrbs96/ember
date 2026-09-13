@@ -8,10 +8,16 @@ The one extra: a streak. Finish at least one task a day and the flame at the top
 
 ## Views
 
-- **Today** is the default. Unfinished one-off tasks from the day before carry over. Kindling items are added fresh each morning.
-- **Kindling** is the recurring list. Anything here starts every new day's list. It is what you use to get the fire going.
+- **Today** is the default. Unfinished one-off tasks from the day before carry over. Fuel items are added fresh each morning.
+- **Fuel** is the recurring list. Anything here is on every new day's list. It is what you feed the fire.
 - **History** shows the last 30 days as a strip of embers, lit on days you finished something, and one collapsible row per past day with what got done and what did not.
-- **Data** shows what is stored and how much space it takes, and lets you export it as JSON, stop saving, or erase everything.
+- **Settings** holds the theme choice, a sample-data loader so you can see every view without waiting six weeks, and your data: what is stored, how much space it takes, export as JSON, stop saving, or erase everything.
+
+The line under the name changes with your streak, from "Light it up." to "Nothing puts you out."
+
+## Try it with sample data
+
+Under Settings, "Load sample data" fills in six weeks of made-up days, three Fuel items, and a streak. A banner says it is sample data until you erase it.
 
 ## Run it
 
@@ -29,7 +35,7 @@ then open http://localhost:8765.
 
 Ember asks once, on first run, before it writes anything to your browser. Say no and the list lives in memory until you close the tab. You can change your mind under Data.
 
-What is stored: your tasks by day, Kindling, the streak, and your theme choice. Days older than two years are dropped. Nothing is transmitted anywhere. There are no cookies and no analytics.
+What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days older than two years are dropped. Nothing is transmitted anywhere. There are no cookies and no analytics.
 
 ## How the streak works
 
@@ -42,7 +48,11 @@ What is stored: your tasks by day, Kindling, the streak, and your theme choice. 
 
 - Type and press Enter to add. Escape clears the box.
 - Tab to a task, Enter or Space to finish it. The next stop is its remove button.
-- Dim and Bright switch the theme. Without a choice, Ember follows your OS.
+- Dim and Bright switch the theme from the header or Settings. Without a choice, Ember follows your OS.
+
+## Sizes
+
+One column from a watch face to a wide monitor. Type scales down below 400px and again below 290px, and up above 900px and 1600px. All motion is transform and opacity only, and switches off under the reduced-motion setting.
 
 ## Design
 
