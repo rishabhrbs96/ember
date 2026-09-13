@@ -24,7 +24,8 @@ The orange is used for: the lit flame, a finished task's mark, lit day embers, t
 ## Vocabulary
 
 - Fuel: the recurring list that goes on every day. Chosen over "master list" and "kindling" because everyone knows what fuel does to a fire.
-- Lit / out: the streak states. "Burning" for the count line.
+- Out / warm / burning: the flame states. Out means no streak. Warm means the streak is alive but today's list is not finished. Burning means today is done.
+- Done: a day counts when every task on it is finished. Finishing one thing is not enough to keep a fire going.
 - Dim / Bright: the theme switch labels. They name the action, not the mode.
 
 ## Palette (agent chosen)
@@ -75,10 +76,10 @@ Type scales with the device through the root font size: 87.5% under 290px (watch
 Motion only where it shows cause and effect. Every animation is transform, opacity, or background-size, so it stays cheap.
 
 - Add: the row slides in from the input.
-- Finish: the mark fills, three sparks leave it (500ms), the row glides to the bottom, the numeral bumps if the streak grew, the flame flares once.
+- Finish: the mark fills, three sparks leave it (500ms), the row glides to the bottom. When the last task tips today into done, the flame flares and starts to burn. Adding or unfinishing a task after that settles it back to warm.
 - Remove: the row slides out.
 - Focus the input: the ember underline draws in from the left.
-- Open History: the 30 dots fill in over 240ms, left to right, like days passing.
+- Open History: 35 embers fill in over 210ms, left to right, like days passing.
 - The flame flickers while lit and its glow tracks today's completion.
 
 No fades on view switches, no ambient movement anywhere else. All of it is off under prefers-reduced-motion.
@@ -86,3 +87,11 @@ No fades on view switches, no ambient movement anywhere else. All of it is off u
 ## Data and consent
 
 A first-run dialog explains that everything stays in the browser and asks before anything is written. It is the only raised surface in the app, hence the only shadow. The primary button is ink on paper rather than orange, so the accent keeps its meaning. The Data view shows exactly what is stored and offers export, stop, and erase.
+
+## History
+
+Three layers, because a person asks three different questions of their past. The five-week grid answers "how consistent am I", each day an ember: faint when nothing was listed, hollow when nothing got done, ember ring when some did, filled when all of it did. The rows answer "how did a given day go", with a bar and a tally. A page per day answers "what exactly happened", grouped into done and not done, so a long list never has to fold into an accordion. Older days load thirty at a time.
+
+## Today
+
+A date line at the top, in words, with the streak day next to it ("Saturday, 13 September. Day 4 of your streak."), so the page reads like the top of a journal entry.

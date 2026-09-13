@@ -4,13 +4,13 @@ A todo list that is only as complicated as a list needs to be.
 
 One box to type in. One tap to finish. Everything stays in your browser's local storage. No account, no server, no sync.
 
-The one extra: a streak. Finish at least one task a day and the flame at the top keeps burning. Miss a day and it goes out.
+The one extra: a streak. Finish everything on the day's list and the flame at the top burns. Leave something undone and it goes out.
 
 ## Views
 
 - **Today** is the default. Unfinished one-off tasks from the day before carry over. Fuel items are added fresh each morning.
 - **Fuel** is the recurring list. Anything here is on every new day's list. It is what you feed the fire.
-- **History** shows the last 30 days as a strip of embers, lit on days you finished something, and one collapsible row per past day with what got done and what did not.
+- **History** shows the last five weeks as a grid of embers, a row per day with a progress bar, and a page per day listing what got done and what did not.
 - **Settings** holds the theme choice and your data: what is stored, how much space it takes, export as JSON, stop saving, or erase everything.
 
 The line beside the flame changes with your streak, from "Light it up." to "Nothing puts you out."
@@ -35,8 +35,9 @@ What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days
 
 ## How the streak works
 
-- Finish at least one task and today counts. The flame lights and the numeral goes up.
-- Finish one tomorrow and the streak grows. Skip a day and it goes out.
+- A day counts when every task on its list is done. The flame burns and the numeral goes up.
+- Until today's list is done the flame is warm: your streak is alive but not yet extended. Leave the list unfinished at midnight and it goes out.
+- Adding a task after the list was done makes the flame warm again until that task is done too.
 - Your best run is remembered and shown when the flame is out.
 - Days are counted in your device's local time.
 
