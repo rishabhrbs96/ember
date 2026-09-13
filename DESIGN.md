@@ -17,7 +17,7 @@ Reading this as: a single-screen personal utility for one person, in a warm ultr
 
 ## Identity motif (owner direction, agent execution)
 
-Fire. The wordmark is the flame plus the name. The flame has two layers: an outer tongue and a paler inner one, each flickering at its own pace while the streak is alive, an outline when it is out. Under it, one line addressed to the person that changes with the streak ("Light it up." through "Nothing puts you out."), then the streak numeral. A small outline flame marks tasks that came from Fuel. History shows each day as a small ember, lit or not. Finishing a task throws five sparks off the mark. Lit and cold always differ in shape as well as colour.
+Fire. The name sits small at the top like a native app title. Below it the hearth: a large flame, the one focal point on every screen, with two layers, an outer tongue and a paler inner one, each flickering at its own pace while the streak is alive, an outline when it is out. Its glow grows with how much of today is finished. Beside it, one line addressed to the person that changes with the streak ("Light it up." through "Nothing puts you out."), then the streak numeral. The same flame is the favicon. A small outline flame marks tasks that came from Fuel. History shows each day as a small ember, lit or not. Finishing a task throws five sparks off the mark. Lit and cold always differ in shape as well as colour.
 
 The orange is used for: the lit flame, a finished task's mark, lit day embers, the active view's underline, and keyboard focus. Nowhere else.
 
@@ -62,7 +62,9 @@ One column, max 30rem wide, generous top margin. Rows are separated by hairlines
 
 ## Views
 
-One screen, four tabs as plain text: Today, Fuel, History, Settings. Today is default because the app's whole job is today. Tabs are text, not icons, because four words are clearer than four glyphs at this size.
+One screen, four views: Today, Fuel, History, Settings. Today is default because the app's whole job is today.
+
+On wide screens the views are a segmented control under the hearth, the active segment filled with ink so there is no ambiguity in either theme. On phones (under 700px) the same control becomes a fixed bar at the bottom of the screen, where thumbs are, each view an icon over a label, the active icon in ember. On watches the labels hide and the icons stay. The four icons are drawn for this app: a checked circle, the flame, three dots for the strip of days, two sliders.
 
 ## Sizes
 
@@ -70,7 +72,16 @@ Type scales with the device through the root font size: 87.5% under 290px (watch
 
 ## Motion budget
 
-Every animation is transform or opacity only, so it runs on the compositor. Sparks are five 4px elements that live for 650ms. The history strip staggers 30 dots over 360ms. View switches fade for 200ms. The flame flicker is the only loop. All of it is off under prefers-reduced-motion.
+Motion only where it shows cause and effect. Every animation is transform, opacity, or background-size, so it stays cheap.
+
+- Add: the row slides in from the input.
+- Finish: the mark fills, three sparks leave it (500ms), the row glides to the bottom, the numeral bumps if the streak grew, the flame flares once.
+- Remove: the row slides out.
+- Focus the input: the ember underline draws in from the left.
+- Open History: the 30 dots fill in over 240ms, left to right, like days passing.
+- The flame flickers while lit and its glow tracks today's completion.
+
+No fades on view switches, no ambient movement anywhere else. All of it is off under prefers-reduced-motion.
 
 ## Data and consent
 

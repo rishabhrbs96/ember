@@ -13,7 +13,7 @@ The one extra: a streak. Finish at least one task a day and the flame at the top
 - **History** shows the last 30 days as a strip of embers, lit on days you finished something, and one collapsible row per past day with what got done and what did not.
 - **Settings** holds the theme choice and your data: what is stored, how much space it takes, export as JSON, stop saving, or erase everything.
 
-The line under the name changes with your streak, from "Light it up." to "Nothing puts you out."
+The line beside the flame changes with your streak, from "Light it up." to "Nothing puts you out."
 
 ## Run it
 
@@ -48,7 +48,7 @@ What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days
 
 ## Sizes
 
-One column from a watch face to a wide monitor. Type scales down below 400px and again below 290px, and up above 900px and 1600px. All motion is transform and opacity only, and switches off under the reduced-motion setting.
+One column from a watch face to a wide monitor. On phones the views sit in a bar at the bottom of the screen. Type scales down below 400px and again below 290px, and up above 900px and 1600px. All motion is transform and opacity only, and switches off under the reduced-motion setting.
 
 ## Design
 
