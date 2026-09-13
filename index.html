@@ -86,11 +86,14 @@
   .flame path {
     transform-box: fill-box;
     transform-origin: 50% 100%;
-    transition: fill 0.4s var(--ease), stroke 0.4s var(--ease), opacity 0.4s var(--ease);
+    transition: fill 0.4s var(--ease), stroke 0.4s var(--ease), opacity 0.4s var(--ease), fill-opacity 0.4s var(--ease);
   }
   .flame .outer { fill: none; stroke: var(--muted); stroke-width: 1.75; stroke-linejoin: round; }
   .flame .inner { fill: var(--paper); opacity: 0; }
-  .flame.lit { filter: drop-shadow(0 0 var(--glow, 8px) var(--ember-glow)); }
+  /* warm: the streak is alive but today's list is not finished. lit: today is done. */
+  .flame.warm .outer { fill: var(--ember); fill-opacity: 0.4; stroke: var(--ember); }
+  .flame.warm { filter: drop-shadow(0 0 var(--glow, 6px) var(--ember-glow)); }
+  .flame.lit { filter: drop-shadow(0 0 14px var(--ember-glow)); }
   .flame.lit .outer { fill: var(--ember); stroke: var(--ember); animation: flicker 2.8s ease-in-out infinite; }
   .flame.lit .inner { opacity: 0.85; animation: flicker 1.9s ease-in-out infinite reverse; }
   @keyframes flicker {
@@ -99,6 +102,8 @@
     65%       { transform: scale(0.97, 1.02) rotate(2deg); }
   }
   .flame.flare { animation: flare 0.7s var(--ease); }
+  .flame.settle { animation: settle 0.6s var(--ease); }
+  @keyframes settle { 40% { transform: scale(0.8); } }
   @keyframes flare {
     0%   { transform: scale(1); }
     35%  { transform: scale(1.5); filter: drop-shadow(0 0 18px var(--ember-glow)); }
@@ -112,7 +117,6 @@
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
   }
-  .count.cold { color: var(--muted); font-weight: 500; }
   .count.bump { animation: bump 0.5s var(--ease); }
   @keyframes bump { 35% { transform: scale(1.3); } }
   #streak { color: var(--muted); font-size: 0.9375rem; line-height: 1.3; }
@@ -592,7 +596,7 @@
   let view = 'today';
 
   function fresh() {
-    return { v: 2, theme: 'system', fuel: [], days: {}, streak: { count: 0, best: 0, last: null } };
+    return { v: 2, theme: 'system', fuel: [], days: {}, streak: { best: 0 } };
   }
   function load() {
     try {
@@ -605,7 +609,7 @@
       const old = JSON.parse(localStorage.getItem(OLD_KEY));
       if (old && Array.isArray(old.tasks)) {
         const s2 = fresh();
-        s2.streak = { count: old.streak.count || 0, best: old.streak.best || old.streak.count || 0, last: old.streak.last || null };
+        s2.streak = { best: old.streak.best || old.streak.count || 0 };
         if (old.tasks.length) s2.days[today()] = old.tasks.map(t => ({ i: t.id, t: t.text, d: t.done ? 1 : 0 }));
         return s2;
       }
@@ -645,18 +649,24 @@
   }
   const todayTasks = () => state.days[today()];
 
-  // Streak: finishing at least one task lights the ember for the day.
-  function lit() {
-    const { count, last } = state.streak;
-    return count > 0 && (last === today() || last === yesterday());
+  // A day is done when every task on its list is finished and the list was not empty.
+  // The streak is the run of done days ending today, or yesterday if today is not done yet.
+  const dayDone = key => { const d = state.days[key]; return !!(d && d.length && d.every(x => x.d)); };
+  function streak() {
+    const todayDone = dayDone(today());
+    let n = 0;
+    for (let i = todayDone ? 0 : 1; dayDone(daysAgo(i)); i++) n++;
+    if (n > (state.streak.best || 0)) state.streak.best = n;
+    return { n, todayDone };
   }
-  function advanceStreak() {
-    const s = state.streak;
-    if (s.last === today()) return false;
-    s.count = s.last === yesterday() ? s.count + 1 : 1;
-    s.best = Math.max(s.best || 0, s.count);
-    s.last = today();
-    return true;
+  // The flame reacts when today tips over into done, or falls back out of it.
+  function reactFlame(wasDone) {
+    const nowDone = dayDone(today());
+    if (reduceMotion || wasDone === nowDone) return;
+    const f = $('flame');
+    const cls = nowDone ? 'flare' : 'settle';
+    f.classList.remove('flare', 'settle'); void f.offsetWidth; f.classList.add(cls);
+    f.addEventListener('animationend', () => f.classList.remove(cls), { once: true });
   }
 
   /* Theme */
@@ -686,27 +696,36 @@
 
   /* Header */
   function renderHearth() {
-    const isLit = lit();
+    const { n, todayDone } = streak();
+    const tasks = todayTasks();
+    const done = tasks.filter(t => t.d).length;
+    const left = tasks.length - done;
+    const ratio = tasks.length ? done / tasks.length : 0;
+    const alive = n > 0;
+
     const flame = $('flame');
-    flame.classList.toggle('lit', isLit);
-    const n = state.streak.count;
+    flame.classList.toggle('lit', todayDone);
+    flame.classList.toggle('warm', alive && !todayDone);
+    flame.style.setProperty('--glow', (4 + 10 * ratio).toFixed(1) + 'px');
+
     const count = $('count');
-    count.textContent = isLit ? n : '0';
-    count.classList.toggle('cold', !isLit);
+    count.hidden = !alive;
+    count.textContent = alive ? String(n) : '';
     let line;
-    if (!isLit) {
+    if (!alive) {
       line = state.streak.best > 1
-        ? `Ember is out. Best run ${state.streak.best} days. Finish one thing to relight it.`
-        : 'Finish one thing today to light the ember.';
-    } else if (state.streak.last === today()) {
-      line = `day${n === 1 ? '' : 's'} burning.`;
+        ? `No streak right now. Your best is ${state.streak.best} days.`
+        : 'No streak yet. Finish today’s list to start one.';
+    } else if (todayDone) {
+      line = `day streak. Today is done.`;
     } else {
-      line = `day${n === 1 ? '' : 's'} burning. Finish one thing today to keep it.`;
+      line = `day streak. ${left === 1 ? 'One task' : left + ' tasks'} left to keep it.`;
     }
     $('streak').textContent = line;
-    $('streak').setAttribute('aria-label', isLit ? `${n} ${line}` : line);
+    $('streak').setAttribute('aria-label', alive ? `${n} ${line}` : line);
 
-    const slogan = !isLit ? (state.streak.best > 1 ? 'Light it again.' : 'Light it up.')
+    const slogan = !alive ? (state.streak.best > 1 ? 'Light it again.' : 'Light it up.')
+      : !todayDone ? (n < 3 ? 'Keep it going.' : 'Don’t let it go out.')
       : n < 3 ? 'You are fire.'
       : n < 7 ? 'Keep it burning.'
       : n < 30 ? 'You are on fire.'
@@ -774,8 +793,9 @@
     rm.textContent = '×';
     rm.setAttribute('aria-label', 'Remove from today: ' + t.t);
     rm.addEventListener('click', () => leaveRow(li, () => {
+      const wasDone = dayDone(today());
       state.days[today()] = todayTasks().filter(x => x.i !== t.i);
-      save(); render();
+      streak(); save(); render(); reactFlame(wasDone);
     }));
 
     li.append(toggle, rm);
@@ -828,8 +848,6 @@
       note.className = 'note'; note.hidden = false;
     } else note.hidden = true;
 
-    const ratio = tasks.length ? done.length / tasks.length : 0;
-    $('flame').style.setProperty('--glow', (6 + 12 * ratio).toFixed(1) + 'px');
     $('foot-today').hidden = tasks.length === 0;
     $('left-today').textContent = open.length === 0 ? 'All finished' : `${open.length} to go`;
     $('clear-today').hidden = done.length === 0;
@@ -852,8 +870,9 @@
     rm.addEventListener('click', () => leaveRow(li, () => {
       state.fuel = state.fuel.filter(x => x.id !== k.id);
       // Drop today's copy too, unless it is already finished.
+      const wasDone = dayDone(today());
       state.days[today()] = todayTasks().filter(x => !(x.k === k.id && !x.d));
-      save(); render();
+      streak(); save(); render(); reactFlame(wasDone);
     }));
     li.append(p, rm);
     return li;
@@ -1020,8 +1039,9 @@
   function toggleTask(id) {
     const t = todayTasks().find(x => x.i === id);
     if (!t) return;
+    const wasDone = dayDone(today());
     t.d = t.d ? 0 : 1;
-    const advanced = t.d && advanceStreak();
+    streak();
     save();
     const li = $('list-today').querySelector(`[data-id="${id}"]`);
     if (li) {
@@ -1029,14 +1049,7 @@
       if (t.d && !reduceMotion) sparks(li.querySelector('.mark'));
     }
     // Let the mark fill before the row glides down.
-    setTimeout(() => {
-      render();
-      if (advanced && !reduceMotion) {
-        const f = $('flame');
-        f.classList.remove('flare'); void f.offsetWidth; f.classList.add('flare');
-        f.addEventListener('animationend', () => f.classList.remove('flare'), { once: true });
-      }
-    }, reduceMotion ? 0 : 180);
+    setTimeout(() => { render(); reactFlame(wasDone); }, reduceMotion ? 0 : 180);
   }
 
   function sparks(mark) {
@@ -1066,15 +1079,17 @@
     });
   }
   wireForm('form-today', 'new-today', text => {
+    const wasDone = dayDone(today());
     const id = uid();
     todayTasks().push({ i: id, t: text, d: 0 });
-    save(); render({ enterId: id });
+    save(); render({ enterId: id }); reactFlame(wasDone);
   });
   wireForm('form-fuel', 'new-fuel', text => {
     const id = uid();
+    const wasDone = dayDone(today());
     state.fuel.push({ id, text });
     ensureToday();
-    save(); render({ enterId: id });
+    save(); render({ enterId: id }); reactFlame(wasDone);
   });
   $('clear-today').addEventListener('click', () => {
     state.days[today()] = todayTasks().filter(t => !t.d);
