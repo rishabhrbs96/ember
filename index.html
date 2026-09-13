@@ -273,6 +273,43 @@
   }
   .link:hover { color: var(--ink); }
 
+  /* History: a strip of embers for the last 30 days, then one row per day. */
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(30, 1fr);
+    gap: 4px;
+    margin: 0 0 1.75rem;
+  }
+  .day-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+  }
+  .strip .day-dot { width: 100%; max-width: 12px; aspect-ratio: 1; height: auto; justify-self: center; }
+  .day-dot.some { border-color: var(--muted); }
+  .day-dot.lit { background: var(--ember); border-color: var(--ember); }
+  .day-dot.today { outline: 2px solid var(--muted); outline-offset: 2px; }
+  details { border-bottom: 1px solid var(--line); }
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 52px;
+    padding: 0.6rem 0;
+    list-style: none;
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary .when { flex: 1; }
+  summary .tally { color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+  .day-tasks { padding: 0 0 0.75rem; }
+  .day-tasks li { border: 0; }
+  .day-tasks .plain { min-height: 40px; padding: 0.35rem 0; color: var(--muted); font-size: 0.9375rem; }
+  .day-tasks .mark { width: 16px; height: 16px; }
+  .day-tasks .mark::after { left: 3px; top: 1px; width: 4px; height: 7px; }
+  .day-tasks li.done .mark { background: var(--ember); border-color: var(--ember); }
+  .day-tasks li.done .mark::after { transform: rotate(45deg) scale(1); }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
@@ -297,6 +334,7 @@
   <nav aria-label="Views">
     <button type="button" data-view="today">Today</button>
     <button type="button" data-view="kindling">Kindling</button>
+    <button type="button" data-view="history">History</button>
   </nav>
 
   <section id="view-today" aria-label="Today">
@@ -318,6 +356,13 @@
     </form>
     <ul id="list-kindling" aria-label="Kindling items"></ul>
     <p class="note" id="note-kindling" hidden></p>
+  </section>
+
+  <section id="view-history" aria-label="History" hidden>
+    <p class="lead" id="strip-lead">Last 30 days</p>
+    <div class="strip" id="strip" role="img"></div>
+    <div id="days"></div>
+    <p class="note" id="note-history" hidden></p>
   </section>
 </main>
 
@@ -582,10 +627,95 @@
     note.textContent = 'Nothing yet. Add the things you want on every day’s list.';
   }
 
+  /* History */
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  function dayLabel(key) {
+    if (key === today()) return 'Today';
+    if (key === yesterday()) return 'Yesterday';
+    const [y, m, d] = key.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    const base = `${WEEKDAYS[date.getDay()]} ${d} ${MONTHS[m - 1]}`;
+    return y === new Date().getFullYear() ? base : `${base} ${y}`;
+  }
+  function tally(tasks) {
+    const done = tasks.filter(x => x.d).length;
+    return { done, total: tasks.length, text: `${done} of ${tasks.length}` };
+  }
+
+  function renderHistory() {
+    const strip = $('strip');
+    strip.textContent = '';
+    let litDays = 0;
+    for (let n = 29; n >= 0; n--) {
+      const key = daysAgo(n);
+      const tasks = state.days[key];
+      const dot = document.createElement('span');
+      dot.className = 'day-dot';
+      if (n === 0) dot.classList.add('today');
+      if (tasks && tasks.length) {
+        dot.classList.add('some');
+        if (tasks.some(x => x.d)) { dot.classList.add('lit'); litDays++; }
+      }
+      dot.title = `${dayLabel(key)}: ${tasks && tasks.length ? tally(tasks).text + ' finished' : 'nothing listed'}`;
+      strip.append(dot);
+    }
+    strip.setAttribute('aria-label', `Last 30 days: the ember was lit on ${litDays} of them.`);
+    $('strip-lead').textContent = `Last 30 days. Lit on ${litDays}.`;
+
+    const wrap = $('days');
+    wrap.textContent = '';
+    const keys = Object.keys(state.days).filter(k => k < today()).sort().reverse();
+    for (const key of keys) {
+      const tasks = state.days[key];
+      if (!tasks.length) continue;
+      const t = tally(tasks);
+      const details = document.createElement('details');
+      const summary = document.createElement('summary');
+      const dot = document.createElement('span');
+      dot.className = 'day-dot' + (t.done ? ' some lit' : ' some');
+      dot.setAttribute('aria-hidden', 'true');
+      const when = document.createElement('span');
+      when.className = 'when';
+      when.textContent = dayLabel(key);
+      const count = document.createElement('span');
+      count.className = 'tally';
+      count.textContent = t.text;
+      summary.append(dot, when, count);
+      summary.setAttribute('aria-label', `${dayLabel(key)}, ${t.text} finished`);
+
+      const ul = document.createElement('ul');
+      ul.className = 'day-tasks';
+      for (const x of [...tasks.filter(a => a.d), ...tasks.filter(a => !a.d)]) {
+        const li = document.createElement('li');
+        if (x.d) li.classList.add('done');
+        const p = document.createElement('span');
+        p.className = 'plain';
+        const mark = document.createElement('span');
+        mark.className = 'mark';
+        mark.setAttribute('aria-hidden', 'true');
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = x.t;
+        p.append(mark, text);
+        p.setAttribute('aria-label', (x.d ? 'Finished: ' : 'Not finished: ') + x.t);
+        if (x.k) p.append(flameIcon('kindled'));
+        li.append(p);
+        ul.append(li);
+      }
+      details.append(summary, ul);
+      wrap.append(details);
+    }
+    const note = $('note-history');
+    note.hidden = keys.length > 0;
+    note.textContent = 'No days behind you yet. Finish something today and it shows up here tomorrow.';
+  }
+
   function render(opts = {}) {
     renderHearth();
     if (view === 'today') renderToday(opts.enterId);
     if (view === 'kindling') renderKindling(opts.enterId);
+    if (view === 'history') renderHistory();
   }
 
   /* Actions */
