@@ -247,6 +247,44 @@
   @media (hover: none) { .remove { opacity: 1; } }
 
   :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 3px; }
+  .field:focus-visible { outline: none; border-radius: 0; }
+
+  /* Data view and the first-run notice. The dialog is the one raised surface. */
+  .facts { margin: 0 0 1.5rem; }
+  .facts div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 44px;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .facts dt { color: var(--muted); }
+  .facts dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+  .small { color: var(--muted); font-size: 0.9375rem; margin: 1.5rem 0 0; }
+  dialog {
+    width: min(26rem, calc(100vw - 2rem));
+    padding: 1.5rem;
+    border: 0;
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  }
+  dialog::backdrop { background: rgba(20, 18, 16, 0.55); }
+  dialog h2 { font-size: 1.2rem; margin: 0 0 0.75rem; }
+  dialog p { margin: 0 0 0.75rem; color: var(--muted); }
+  dialog form { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center; margin: 1.25rem 0 0; }
+  .primary {
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border: 0;
+    border-radius: 4px;
+    background: var(--ink);
+    color: var(--paper);
+    cursor: pointer;
+  }
 
   .note { color: var(--muted); margin: 2.5rem 0 0; text-align: center; }
   .note.error { color: var(--ink); }
@@ -335,6 +373,7 @@
     <button type="button" data-view="today">Today</button>
     <button type="button" data-view="kindling">Kindling</button>
     <button type="button" data-view="history">History</button>
+    <button type="button" data-view="data">Data</button>
   </nav>
 
   <section id="view-today" aria-label="Today">
@@ -364,7 +403,33 @@
     <div id="days"></div>
     <p class="note" id="note-history" hidden></p>
   </section>
+
+  <section id="view-data" aria-label="Data" hidden>
+    <p class="lead">Everything Ember knows lives in this browser's local storage. Nothing is sent anywhere. No account, no cookies, no analytics.</p>
+    <dl class="facts">
+      <div><dt>Saving to this device</dt><dd id="data-consent"></dd></div>
+      <div><dt>Space used</dt><dd id="data-size"></dd></div>
+      <div><dt>Days recorded</dt><dd id="data-days"></dd></div>
+    </dl>
+    <div class="actions">
+      <button type="button" class="link" id="data-toggle"></button>
+      <button type="button" class="link" id="data-export">Export as JSON</button>
+      <button type="button" class="link" id="data-erase">Erase everything</button>
+    </div>
+    <p class="note" id="note-data" hidden></p>
+    <p class="small">Days older than two years are dropped automatically. Clearing this site's data in your browser also removes everything.</p>
+  </section>
 </main>
+
+<dialog id="consent" aria-labelledby="consent-title">
+  <h2 id="consent-title">Ember keeps your list on this device</h2>
+  <p>Your tasks, Kindling, streak, and theme are saved in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
+  <p>You can export or erase all of it any time from the Data view.</p>
+  <form method="dialog">
+    <button type="submit" value="yes" class="primary">Keep it on this device</button>
+    <button type="submit" value="no" class="link">Not now</button>
+  </form>
+</dialog>
 
 <script>
 (() => {
@@ -405,7 +470,9 @@
     } catch { storageBroken = true; }
     return fresh();
   }
+  // Nothing is written until the person has said yes on the first-run notice.
   function save() {
+    if (!state.consent) return;
     try {
       localStorage.setItem(KEY, JSON.stringify(state));
       localStorage.removeItem(OLD_KEY);
@@ -585,6 +652,9 @@
     if (storageBroken) {
       note.textContent = 'Your browser is blocking storage, so this list will vanish when you close the tab. Private window?';
       note.className = 'note error'; note.hidden = false;
+    } else if (!state.consent) {
+      note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Data.';
+      note.className = 'note error'; note.hidden = false;
     } else if (tasks.length === 0) {
       note.textContent = state.kindling.length
         ? 'Nothing left for today.'
@@ -711,11 +781,70 @@
     note.textContent = 'No days behind you yet. Finish something today and it shows up here tomorrow.';
   }
 
+  /* Data */
+  function renderData(message) {
+    $('data-consent').textContent = state.consent ? `On, since ${dayLabel(state.consent)}` : 'Off';
+    const bytes = new Blob([JSON.stringify(state)]).size;
+    $('data-size').textContent = bytes < 1024 ? `${bytes} bytes` : `${(bytes / 1024).toFixed(1)} KB`;
+    $('data-days').textContent = String(Object.keys(state.days).length);
+    $('data-toggle').textContent = state.consent ? 'Stop saving' : 'Start saving';
+    const note = $('note-data');
+    note.hidden = !message;
+    note.textContent = message || '';
+  }
+  $('data-toggle').addEventListener('click', () => {
+    if (state.consent) {
+      state.consent = null;
+      try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); } catch {}
+      renderData('Stopped. The saved copy was removed from this browser. This session’s list lasts until you close the tab.');
+    } else {
+      state.consent = today();
+      save();
+      renderData(storageBroken ? 'Your browser is blocking storage, so nothing could be saved.' : 'Saving to this device.');
+    }
+  });
+  $('data-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `ember-${today()}.json`;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    renderData('Exported. The file holds every task, day, and the streak, as JSON.');
+  });
+  $('data-erase').addEventListener('click', () => {
+    if (!confirm('Erase every task, Kindling item, past day, and the streak from this browser? This cannot be undone.')) return;
+    const consent = state.consent;
+    state = fresh();
+    state.consent = consent;
+    try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); } catch {}
+    ensureToday();
+    save();
+    applyTheme();
+    renderHearth();
+    renderData('Erased.');
+  });
+
   function render(opts = {}) {
     renderHearth();
     if (view === 'today') renderToday(opts.enterId);
     if (view === 'kindling') renderKindling(opts.enterId);
     if (view === 'history') renderHistory();
+    if (view === 'data') renderData();
+  }
+
+  /* First run: ask before keeping anything. Escape counts as "not now". */
+  function askConsent() {
+    const dlg = $('consent');
+    dlg.addEventListener('close', () => {
+      if (dlg.returnValue === 'yes') { state.consent = today(); save(); }
+      render();
+      if (matchMedia('(hover: hover)').matches) $('new-today').focus();
+    }, { once: true });
+    dlg.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); dlg.close('no'); } });
+    dlg.showModal();
   }
 
   /* Actions */
@@ -780,6 +909,7 @@
   if (ensureToday()) save();
   applyTheme();
   showView('today');
+  if (!storageBroken && !state.consent) askConsent();
 })();
 </script>
 </body>
