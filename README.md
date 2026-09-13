@@ -33,7 +33,7 @@ then open http://localhost:8765.
 
 ## Your data
 
-Ember asks once, on first run, before it writes anything to your browser. Say no and the list lives in memory until you close the tab. You can change your mind under Data.
+Ember asks once, on first run, before it writes anything to your browser. Say no and the list lives in memory until you close the tab. You can change your mind under Settings.
 
 What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days older than two years are dropped. Nothing is transmitted anywhere. There are no cookies and no analytics.
 
