@@ -75,7 +75,7 @@
   }
   .slogan.swap { animation: fadeIn 0.4s var(--ease); }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } }
-  .streak-line { display: flex; align-items: baseline; gap: 0.4rem; margin: 0; }
+  .streak-line { display: flex; align-items: baseline; gap: 0.1rem; margin: 0; }
   .flame {
     width: 56px; height: 56px;
     flex: none;
@@ -766,12 +766,12 @@
         ? `No streak right now. Your best is ${state.streak.best} days.`
         : 'No streak yet. Finish today’s list to start one.';
     } else if (todayDone) {
-      line = `day streak. Today is done.`;
+      line = `-day streak. Today is done.`;
     } else {
-      line = `day streak. ${left === 1 ? 'One task' : left + ' tasks'} left to keep it.`;
+      line = `-day streak. ${left === 1 ? 'One task' : left + ' tasks'} left to keep it.`;
     }
     $('streak').textContent = line;
-    $('streak').setAttribute('aria-label', alive ? `${n} ${line}` : line);
+    $('streak').setAttribute('aria-label', alive ? `${n}${line}` : line);
 
     const slogan = !alive ? (state.streak.best > 1 ? 'Light it again.' : 'Light it up.')
       : !todayDone ? (n < 3 ? 'Keep it going.' : 'Don’t let it go out.')
