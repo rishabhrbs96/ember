@@ -11,13 +11,9 @@ The one extra: a streak. Finish at least one task a day and the flame at the top
 - **Today** is the default. Unfinished one-off tasks from the day before carry over. Fuel items are added fresh each morning.
 - **Fuel** is the recurring list. Anything here is on every new day's list. It is what you feed the fire.
 - **History** shows the last 30 days as a strip of embers, lit on days you finished something, and one collapsible row per past day with what got done and what did not.
-- **Settings** holds the theme choice, a sample-data loader so you can see every view without waiting six weeks, and your data: what is stored, how much space it takes, export as JSON, stop saving, or erase everything.
+- **Settings** holds the theme choice and your data: what is stored, how much space it takes, export as JSON, stop saving, or erase everything.
 
 The line under the name changes with your streak, from "Light it up." to "Nothing puts you out."
-
-## Try it with sample data
-
-Under Settings, "Load sample data" fills in six weeks of made-up days, three Fuel items, and a streak. A banner says it is sample data until you erase it.
 
 ## Run it
 

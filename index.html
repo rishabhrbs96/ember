@@ -336,7 +336,6 @@
   .note { color: var(--muted); margin: 2.5rem 0 0; text-align: center; }
   .note.error { color: var(--ink); }
   .lead { color: var(--muted); margin: 0 0 1.25rem; }
-  .banner { color: var(--muted); font-size: 0.9375rem; margin: -0.75rem 0 1.25rem; }
 
   .foot {
     display: flex;
@@ -469,7 +468,6 @@
     <button type="button" data-view="history">History</button>
     <button type="button" data-view="settings">Settings</button>
   </nav>
-  <p class="banner" id="sample-banner" hidden>Showing sample data. Erase it under Settings.</p>
 
   <section id="view-today" aria-label="Today">
     <form id="form-today" autocomplete="off">
@@ -506,10 +504,6 @@
       <button type="button" class="choice" data-theme-choice="light">Bright</button>
       <button type="button" class="choice" data-theme-choice="dark">Dim</button>
     </div>
-
-    <h2>Sample data</h2>
-    <p class="lead">Fill Ember with six weeks of made-up days to see every view working. It replaces what is here now and is marked as sample everywhere.</p>
-    <div class="actions"><button type="button" class="link" id="sample-load">Load sample data</button></div>
 
     <h2>Your data</h2>
     <p class="lead">Everything Ember knows lives in this browser's local storage. Nothing is sent anywhere. No account, no cookies, no analytics.</p>
@@ -967,52 +961,7 @@
     renderData('Erased.');
   });
 
-  /* Sample data, clearly labelled, so every view can be seen without waiting six weeks. */
-  function loadSample() {
-    if (Object.keys(state.days).some(k => state.days[k].length) || state.fuel.length) {
-      if (!confirm('Replace your current list, Fuel, history, and streak with sample data?')) return;
-    }
-    const next = fresh();
-    next.consent = state.consent;
-    next.theme = state.theme;
-    next.sample = 1;
-    next.fuel = [
-      { id: uid(), text: 'Stretch for five minutes' },
-      { id: uid(), text: 'Read ten pages' },
-      { id: uid(), text: 'Drink a glass of water' },
-    ];
-    const oneOffs = ['Book the dentist', 'Reply to Sam', 'Water the basil', 'Fix the bike light', 'Call the bank',
-      'Post the parcel', 'Plan the weekend', 'Clean the desk', 'Buy coffee beans', 'Renew the passport',
-      'Write the birthday card', 'Sort the receipts', 'Back up the laptop', 'Return the library books'];
-    let seed = 42;
-    const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-    for (let n = 45; n >= 1; n--) {
-      if (rnd() < 0.1) continue;
-      const tasks = next.fuel.map(f => ({ i: uid(), t: f.text, d: rnd() < 0.7 ? 1 : 0, k: f.id }));
-      const extra = 1 + Math.floor(rnd() * 3);
-      for (let e = 0; e < extra; e++) tasks.push({ i: uid(), t: oneOffs[Math.floor(rnd() * oneOffs.length)], d: rnd() < 0.6 ? 1 : 0 });
-      if (rnd() < 0.12) for (const t of tasks) t.d = 0;
-      next.days[daysAgo(n)] = tasks;
-    }
-    let run = 0, best = 0, current = 0;
-    for (let n = 45; n >= 1; n--) {
-      const d = next.days[daysAgo(n)];
-      run = d && d.some(x => x.d) ? run + 1 : 0;
-      best = Math.max(best, run);
-      if (n === 1) current = run;
-    }
-    next.streak = { count: current, best, last: current ? yesterday() : null };
-    state = next;
-    ensureToday();
-    todayTasks().push({ i: uid(), t: 'Send the invoice', d: 0 }, { i: uid(), t: 'Walk after lunch', d: 0 });
-    save();
-    applyTheme();
-    showView('today');
-  }
-  $('sample-load').addEventListener('click', loadSample);
-
   function render(opts = {}) {
-    $('sample-banner').hidden = !state.sample;
     renderHearth();
     if (view === 'today') renderToday(opts.enterId);
     if (view === 'fuel') renderFuel(opts.enterId);

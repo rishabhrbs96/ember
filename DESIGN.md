@@ -72,10 +72,6 @@ Type scales with the device through the root font size: 87.5% under 290px (watch
 
 Every animation is transform or opacity only, so it runs on the compositor. Sparks are five 4px elements that live for 650ms. The history strip staggers 30 dots over 360ms. View switches fade for 200ms. The flame flicker is the only loop. All of it is off under prefers-reduced-motion.
 
-## Sample data
-
-Settings offers a labelled sample set so every view can be seen at once. A banner stays visible until it is erased, so made-up days are never mistaken for real ones.
-
 ## Data and consent
 
 A first-run dialog explains that everything stays in the browser and asks before anything is written. It is the only raised surface in the app, hence the only shadow. The primary button is ink on paper rather than orange, so the accent keeps its meaning. The Data view shows exactly what is stored and offers export, stop, and erase.
