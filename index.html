@@ -204,6 +204,24 @@
     transition: background-size 0.3s var(--ease);
   }
   .field::placeholder { color: var(--muted); opacity: 1; }
+  .field-row { display: flex; align-items: flex-end; gap: 0.5rem; }
+  .later {
+    flex: none;
+    min-height: 44px;
+    padding: 0 0.25rem;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease), color 0.15s var(--ease);
+  }
+  .field:not(:placeholder-shown) ~ .later { opacity: 1; pointer-events: auto; }
+  .later:hover { color: var(--ink); }
   .field:focus-visible { background-size: 100% 2px; }
 
   /* Rows: hairlines separate tasks. No cards. */
@@ -561,8 +579,9 @@
 
   <section id="view-today" aria-label="Today">
     <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span></p>
-    <form id="form-today" autocomplete="off">
+    <form id="form-today" class="field-row" autocomplete="off">
       <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
+      <button type="button" class="later" id="later" title="Put this on tomorrow’s list">Tomorrow</button>
     </form>
     <ul id="list-today" aria-label="Today's tasks"></ul>
     <p class="note" id="note-today" hidden></p>
@@ -570,6 +589,7 @@
       <span id="left-today"></span>
       <button type="button" class="link" id="clear-today">Clear done</button>
     </div>
+    <p class="small" id="tomorrow-line" hidden></p>
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
@@ -702,19 +722,22 @@
     } catch { storageBroken = true; }
   }
 
-  // A new day starts with unfinished one-off tasks carried over, plus every Fuel item.
+  // A new day carries over unfinished one-off tasks, then adds every Fuel item.
+  // The roll happens once per day, so a list made ahead of time (Tomorrow) is kept.
   function ensureToday() {
     const t = today();
-    if (!state.days[t]) {
+    let changed = false;
+    const createdNow = !state.days[t];
+    if (createdNow) { state.days[t] = []; changed = true; }
+    if (state.rolled === undefined) state.rolled = createdNow ? '' : t;
+    if (state.rolled !== t) {
       const prev = Object.keys(state.days).filter(k => k < t).sort().pop();
-      const carried = prev
-        ? state.days[prev].filter(x => !x.d && !x.k).map(x => ({ i: uid(), t: x.t, d: 0, c: 1 }))
-        : [];
-      state.days[t] = carried;
+      if (prev) for (const x of state.days[prev]) if (!x.d && !x.k) state.days[t].push({ i: uid(), t: x.t, d: 0, c: 1 });
+      state.rolled = t;
       const cutoff = daysAgo(KEEP_DAYS);
       for (const k of Object.keys(state.days)) if (k < cutoff) delete state.days[k];
+      changed = true;
     }
-    let changed = false;
     for (const k of state.fuel) {
       if (!state.days[t].some(x => x.k === k.id)) {
         state.days[t].push({ i: uid(), t: k.text, d: 0, k: k.id });
@@ -723,6 +746,7 @@
     }
     return changed;
   }
+  const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return dayOf(d); };
   const todayTasks = () => state.days[today()];
 
   // A day is done when every task on its list is finished and the list was not empty.
@@ -927,6 +951,9 @@
     $('left-today').textContent = open.length === 0 ? 'All done for today' : `${open.length} left`;
 
     const { n, todayDone } = streak();
+    const ahead = (state.days[tomorrow()] || []).length;
+    $('tomorrow-line').hidden = ahead === 0;
+    $('tomorrow-line').textContent = ahead === 1 ? 'One task waiting for tomorrow.' : `${ahead} tasks waiting for tomorrow.`;
     $('date-today').textContent = longDate(today());
     $('date-hint').textContent = tasks.length === 0 ? 'A clean page.'
       : todayDone ? (n > 1 ? `Day ${n} of your streak. Done.` : 'Done.')
@@ -1216,9 +1243,22 @@
     });
     $(inputId).addEventListener('keydown', e => {
       if (e.key === 'Escape') e.target.value = '';
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && inputId === 'new-today') { e.preventDefault(); addForTomorrow(); return; }
       if (e.key === 'Enter') { e.preventDefault(); $(formId).requestSubmit(); }
     });
   }
+  function addForTomorrow() {
+    const input = $('new-today');
+    const text = input.value.trim();
+    if (!text) return;
+    const key = tomorrow();
+    state.days[key] = state.days[key] || [];
+    state.days[key].push({ i: uid(), t: text, d: 0 });
+    input.value = '';
+    save(); render();
+    input.focus();
+  }
+  $('later').addEventListener('click', addForTomorrow);
   wireForm('form-today', 'new-today', text => {
     const wasDone = dayDone(today());
     const id = uid();
