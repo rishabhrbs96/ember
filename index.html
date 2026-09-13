@@ -367,6 +367,8 @@
   .note { color: var(--muted); margin: 2.5rem 0 0; text-align: center; }
   .note.error { color: var(--ink); }
   .lead { color: var(--muted); margin: 0 0 1.25rem; }
+  .date-line { margin: 0 0 0.75rem; font-weight: 600; }
+  .date-hint { color: var(--muted); font-weight: 400; }
 
   .foot {
     display: flex;
@@ -511,19 +513,20 @@
   </nav>
 
   <section id="view-today" aria-label="Today">
+    <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span></p>
     <form id="form-today" autocomplete="off">
-      <input class="field" id="new-today" type="text" placeholder="What needs doing?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
+      <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
     </form>
     <ul id="list-today" aria-label="Today's tasks"></ul>
     <p class="note" id="note-today" hidden></p>
     <div class="foot" id="foot-today" hidden>
       <span id="left-today"></span>
-      <button type="button" class="link" id="clear-today">Clear finished</button>
+      <button type="button" class="link" id="clear-today">Clear done</button>
     </div>
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
-    <p class="lead">Fuel is what you feed the fire every day. Anything here is on every new day’s list.</p>
+    <p class="lead">Fuel goes on the fire every morning. Whatever you add here is on every new day’s list.</p>
     <form id="form-fuel" autocomplete="off">
       <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New fuel item" enterkeyhint="done" maxlength="200">
     </form>
@@ -842,14 +845,19 @@
       note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Settings.';
       note.className = 'note error'; note.hidden = false;
     } else if (tasks.length === 0) {
-      note.textContent = state.fuel.length
-        ? 'Nothing left for today.'
-        : 'Nothing on the list. Type one thing above.';
+      note.textContent = 'Your day is clear. Add the first thing above.';
       note.className = 'note'; note.hidden = false;
     } else note.hidden = true;
 
     $('foot-today').hidden = tasks.length === 0;
-    $('left-today').textContent = open.length === 0 ? 'All finished' : `${open.length} to go`;
+    $('left-today').textContent = open.length === 0 ? 'All done for today' : `${open.length} left`;
+
+    const { n, todayDone } = streak();
+    $('date-today').textContent = longDate(today());
+    $('date-hint').textContent = tasks.length === 0 ? 'A clean page.'
+      : todayDone ? (n > 1 ? `Day ${n} of your streak. Done.` : 'Done.')
+      : n > 0 ? `Day ${n + 1} of your streak.`
+      : 'Day one.';
     $('clear-today').hidden = done.length === 0;
   }
 
@@ -881,12 +889,19 @@
     renderList($('list-fuel'), state.fuel, fuelRow, enterId);
     const note = $('note-fuel');
     note.hidden = state.fuel.length > 0;
-    note.textContent = 'Nothing yet. Add the things you want on every day’s list.';
+    note.textContent = 'No fuel yet. Add the things you do every day, like a walk or ten pages.';
   }
 
   /* History */
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const FULL_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const FULL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function longDate(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    return `${FULL_DAYS[date.getDay()]}, ${d} ${FULL_MONTHS[m - 1]}`;
+  }
   function dayLabel(key) {
     if (key === today()) return 'Today';
     if (key === yesterday()) return 'Yesterday';
