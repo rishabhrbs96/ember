@@ -37,7 +37,7 @@ then open http://localhost:8765.
 
 Ember asks once, on first run, before it writes anything to your browser. Say no and the list lives in memory until you close the tab. You can change your mind under Settings.
 
-What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days older than two years are dropped. Nothing is transmitted anywhere. There are no cookies and no analytics.
+What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days older than two years are dropped. Nothing is transmitted anywhere. There are no cookies and no analytics. The two typefaces ship with the app, so not even a font request leaves your device.
 
 ## How the streak works
 
@@ -63,4 +63,4 @@ See [DESIGN.md](DESIGN.md) for the direction, palette, and motion rules. The UI 
 
 ## License
 
-MIT.
+MIT for the app. The typefaces Federo and Poiret One are under the SIL Open Font License, see `fonts/LICENSE.txt`.

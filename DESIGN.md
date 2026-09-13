@@ -45,9 +45,11 @@ Why warm: an ember belongs on paper, not on a screen-blue white. Why one accent:
 
 Theme follows the operating system until the person picks Dim or Bright. The choice is remembered.
 
-## Typography (agent chosen)
+## Typography (owner's pick)
 
-System UI stack. Reasons: zero network requests keeps the app instant and offline, and a personal list should look native to whatever device it lives on. Task text is slightly larger than UI text so the list reads before the chrome.
+Federo for display, Poiret One for everything else. Both are single-weight faces, so nothing on the page is bold; hierarchy comes from size, case, and spacing instead. Federo is an inscriptional Art Deco face: it carries the wordmark (uppercase, tracked wide), the slogan, the streak numeral, the date line, day titles, and dialog titles. Poiret One is a hairline geometric in the same 1920s register: it carries tasks, hints, buttons, and navigation. Navigation and section labels are spaced uppercase, which is an owner-directed luxury cue and recorded here as such.
+
+The two files are self-hosted in the repository under the SIL Open Font License, so no visitor ever contacts a font service. The fallback stacks are Copperplate then Georgia for display, Avenir Next or Futura then the system sans for text.
 
 ## Spacing
 
