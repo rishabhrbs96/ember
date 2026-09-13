@@ -6,6 +6,9 @@
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="A todo list that is only as complicated as a list needs to be. Stays in your browser.">
 <title>Ember</title>
+<meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c9501c' d='M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z'/%3E%3Cpath fill='%23faf7f2' opacity='.85' d='M12 11.5c.5 2 2.4 3 2.4 5.1a2.4 2.4 0 0 1-4.8 0c0-1.4 1-2.3 1.3-2.9.1.9.4 1.3.9 1.4.2-1.2-.1-2.4.2-3.6z'/%3E%3C/svg%3E">
 <style>
   :root {
     --paper: #faf7f2;
@@ -52,35 +55,29 @@
     padding: clamp(1.5rem, 6vh, 4rem) 1.25rem 8rem;
   }
 
-  /* Header: wordmark with the flame, a line for the person, then the streak. */
-  header { margin-bottom: 1.25rem; }
-  .brand-row { display: flex; align-items: center; gap: 0.75rem; }
-  .brand {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1;
-  }
-  .slogan {
-    margin: 0.35rem 0 1rem;
-    color: var(--muted);
-    font-size: 1.0625rem;
-  }
-  .slogan.swap { animation: fadeIn 0.4s var(--ease); }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } }
+  /* Header: a small title row, then the hearth. The flame is the one focal point. */
+  header { margin-bottom: 1.5rem; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .wordmark { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
   .hearth {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 1rem;
     min-width: 0;
   }
+  .hearth-text { min-width: 0; }
+  .slogan {
+    margin: 0 0 0.2rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .slogan.swap { animation: fadeIn 0.4s var(--ease); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } }
+  .streak-line { display: flex; align-items: baseline; gap: 0.4rem; margin: 0; }
   .flame {
-    width: 34px; height: 34px;
+    width: 56px; height: 56px;
     flex: none;
     overflow: visible;
     transform-origin: 50% 90%;
@@ -109,6 +106,7 @@
   }
   .count {
     font-size: 1.5rem;
+    line-height: 1;
     font-weight: 600;
     line-height: 1;
     letter-spacing: -0.02em;
@@ -117,11 +115,7 @@
   .count.cold { color: var(--muted); font-weight: 500; }
   .count.bump { animation: bump 0.5s var(--ease); }
   @keyframes bump { 35% { transform: scale(1.3); } }
-  .streak-line {
-    color: var(--muted);
-    font-size: 0.9375rem;
-    line-height: 1.3;
-  }
+  #streak { color: var(--muted); font-size: 0.9375rem; line-height: 1.3; }
   .theme {
     min-height: 44px;
     padding: 0 0.5rem;
@@ -410,9 +404,9 @@
     html { font-size: 87.5%; }
     main { padding: 0.6rem 0.6rem 3rem; }
     header { margin-bottom: 0.75rem; }
-    .brand { font-size: 1.35rem; }
-    .flame { width: 28px; height: 28px; }
-    .slogan { margin-bottom: 0.6rem; }
+    .topbar { margin-bottom: 0.75rem; }
+    .flame { width: 40px; height: 40px; }
+    .slogan { font-size: 1.1rem; }
     nav { flex-wrap: wrap; gap: 0 0.75rem; margin-bottom: 1rem; }
     nav button { min-height: 40px; }
     .toggle, .plain { min-height: 44px; gap: 0.6rem; }
@@ -445,20 +439,19 @@
 </svg>
 <main>
   <header>
-    <div class="brand-row">
-      <h1 class="brand">
-        <svg class="flame" id="flame" viewBox="0 0 24 24" aria-hidden="true">
-          <path class="outer" d="M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z"/>
-          <path class="inner" d="M12 11.5c.5 2 2.4 3 2.4 5.1a2.4 2.4 0 0 1-4.8 0c0-1.4 1-2.3 1.3-2.9.1.9.4 1.3.9 1.4.2-1.2-.1-2.4.2-3.6z"/>
-        </svg>
-        <span>Ember</span>
-      </h1>
+    <div class="topbar">
+      <h1 class="wordmark">Ember</h1>
       <button type="button" class="theme" id="theme"></button>
     </div>
-    <p class="slogan" id="slogan"></p>
     <div class="hearth">
-      <span class="count" id="count" aria-hidden="true"></span>
-      <span class="streak-line" id="streak" role="status"></span>
+      <svg class="flame" id="flame" viewBox="0 0 24 24" aria-hidden="true">
+        <path class="outer" d="M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z"/>
+        <path class="inner" d="M12 11.5c.5 2 2.4 3 2.4 5.1a2.4 2.4 0 0 1-4.8 0c0-1.4 1-2.3 1.3-2.9.1.9.4 1.3.9 1.4.2-1.2-.1-2.4.2-3.6z"/>
+      </svg>
+      <div class="hearth-text">
+        <p class="slogan" id="slogan"></p>
+        <p class="streak-line"><span class="count" id="count" aria-hidden="true"></span><span id="streak" role="status"></span></p>
+      </div>
     </div>
   </header>
 
