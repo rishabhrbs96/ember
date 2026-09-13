@@ -86,7 +86,19 @@ No fades on view switches, no ambient movement anywhere else. All of it is off u
 
 ## Data and consent
 
-A first-run dialog explains that everything stays in the browser and asks before anything is written. It is the only raised surface in the app, hence the only shadow. The primary button is ink on paper rather than orange, so the accent keeps its meaning. The Data view shows exactly what is stored and offers export, stop, and erase.
+A first-run dialog explains that everything stays in the browser and asks before anything is written. Settings shows exactly what is stored and offers export, stop, and erase.
+
+## Dialogs
+
+Every dialog looks like a dialog: a bordered panel with a shadow over a darkened, blurred page, a title phrased as the question, one paragraph, then the actions on their own row with the cancel on the left and the primary on the right. The browser's own confirm() is never used. A destructive primary is ember; every other primary is ink.
+
+## Tomorrow
+
+The one concession to planning ahead. A Tomorrow link appears beside the input once there is text, and Cmd or Ctrl with Enter does the same. Nothing else about tomorrow is shown except a single muted count under today's list.
+
+## Install
+
+Ember installs as an app through the web app manifest and a service worker. The Install row in Settings says the right thing for the browser it is in: a button where the browser offers one, the Share then Add to Home Screen steps on iPhone, a menu hint elsewhere, and "Installed" once it is. The icon is the flame in paper on an ember square.
 
 ## History
 
