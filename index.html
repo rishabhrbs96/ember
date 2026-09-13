@@ -249,7 +249,22 @@
   :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 3px; }
   .field:focus-visible { outline: none; border-radius: 0; }
 
-  /* Data view and the first-run notice. The dialog is the one raised surface. */
+  /* Settings and the first-run notice. The dialog is the one raised surface. */
+  #view-settings h2 { font-size: 0.9375rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+  #view-settings h2:first-child { margin-top: 0; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .choice {
+    min-height: 44px;
+    padding: 0 0.9rem;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+  }
+  .choice:hover { color: var(--ink); }
+  .choice[aria-pressed="true"] { color: var(--ink); border-color: var(--ember); }
   .facts { margin: 0 0 1.5rem; }
   .facts div {
     display: flex;
@@ -373,7 +388,7 @@
     <button type="button" data-view="today">Today</button>
     <button type="button" data-view="fuel">Fuel</button>
     <button type="button" data-view="history">History</button>
-    <button type="button" data-view="data">Data</button>
+    <button type="button" data-view="settings">Settings</button>
   </nav>
 
   <section id="view-today" aria-label="Today">
@@ -404,7 +419,15 @@
     <p class="note" id="note-history" hidden></p>
   </section>
 
-  <section id="view-data" aria-label="Data" hidden>
+  <section id="view-settings" aria-label="Settings" hidden>
+    <h2>Theme</h2>
+    <div class="choices" role="group" aria-label="Theme">
+      <button type="button" class="choice" data-theme-choice="system">Follow system</button>
+      <button type="button" class="choice" data-theme-choice="light">Bright</button>
+      <button type="button" class="choice" data-theme-choice="dark">Dim</button>
+    </div>
+
+    <h2>Your data</h2>
     <p class="lead">Everything Ember knows lives in this browser's local storage. Nothing is sent anywhere. No account, no cookies, no analytics.</p>
     <dl class="facts">
       <div><dt>Saving to this device</dt><dd id="data-consent"></dd></div>
@@ -424,7 +447,7 @@
 <dialog id="consent" aria-labelledby="consent-title">
   <h2 id="consent-title">Ember keeps your list on this device</h2>
   <p>Your tasks, Fuel, streak, and theme are saved in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
-  <p>You can export or erase all of it any time from the Data view.</p>
+  <p>You can export or erase all of it any time under Settings.</p>
   <form method="dialog">
     <button type="submit" value="yes" class="primary">Keep it on this device</button>
     <button type="submit" value="no" class="link">Not now</button>
@@ -533,6 +556,12 @@
     const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
     $('theme').textContent = next === 'dark' ? 'Dim' : 'Bright';
     $('theme').setAttribute('aria-label', `Switch to ${next} theme`);
+    for (const b of document.querySelectorAll('[data-theme-choice]')) {
+      b.setAttribute('aria-pressed', String(b.dataset.themeChoice === state.theme));
+    }
+  }
+  for (const b of document.querySelectorAll('[data-theme-choice]')) {
+    b.addEventListener('click', () => { state.theme = b.dataset.themeChoice; save(); applyTheme(); });
   }
   $('theme').addEventListener('click', () => {
     state.theme = effectiveTheme() === 'dark' ? 'light' : 'dark';
@@ -657,7 +686,7 @@
       note.textContent = 'Your browser is blocking storage, so this list will vanish when you close the tab. Private window?';
       note.className = 'note error'; note.hidden = false;
     } else if (!state.consent) {
-      note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Data.';
+      note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Settings.';
       note.className = 'note error'; note.hidden = false;
     } else if (tasks.length === 0) {
       note.textContent = state.fuel.length
@@ -836,7 +865,7 @@
     if (view === 'today') renderToday(opts.enterId);
     if (view === 'fuel') renderFuel(opts.enterId);
     if (view === 'history') renderHistory();
-    if (view === 'data') renderData();
+    if (view === 'settings') renderData();
   }
 
   /* First run: ask before keeping anything. Escape counts as "not now". */
