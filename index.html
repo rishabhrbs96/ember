@@ -391,45 +391,79 @@
   }
   .link:hover { color: var(--ink); }
 
-  /* History: a strip of embers for the last 30 days, then one row per day. */
-  .strip {
+  /* History: five weeks of embers in a calendar grid, a row per day with a bar, one page per day. */
+  .weekdays {
     display: grid;
-    grid-template-columns: repeat(30, 1fr);
-    gap: 4px;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
     margin: 0 0 1.75rem;
   }
-  .day-dot {
+  .cell {
+    width: 100%;
+    max-width: 44px;
+    aspect-ratio: 1;
+    justify-self: center;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+  .cell:disabled { cursor: default; }
+  .cell.spacer { visibility: hidden; }
+  .cell::before {
+    content: "";
     width: 12px; height: 12px;
     border-radius: 50%;
     border: 2px solid var(--line);
-  }
-  .strip .day-dot {
-    width: 100%; max-width: 12px; aspect-ratio: 1; height: auto; justify-self: center;
     animation: dotIn 0.3s var(--ease) both;
-    animation-delay: calc(var(--i, 0) * 8ms);
+    animation-delay: calc(var(--i, 0) * 6ms);
+    transition: transform 0.15s var(--ease);
   }
   @keyframes dotIn { from { opacity: 0; transform: scale(0.4); } }
-  .day-dot.some { border-color: var(--muted); }
-  .day-dot.lit { background: var(--ember); border-color: var(--ember); }
-  .day-dot.today { outline: 2px solid var(--muted); outline-offset: 2px; }
-  details { border-bottom: 1px solid var(--line); }
-  summary {
+  .cell:hover:not(:disabled)::before { transform: scale(1.25); }
+  .cell.some::before { border-color: var(--muted); }
+  .cell.part::before { border-color: var(--ember); }
+  .cell.lit::before { background: var(--ember); border-color: var(--ember); }
+  .cell.today::before { outline: 2px solid var(--muted); outline-offset: 2px; }
+
+  .days li { border-bottom: 1px solid var(--line); }
+  .dayrow {
+    width: 100%;
     display: flex;
     align-items: center;
     gap: 0.85rem;
     min-height: 52px;
     padding: 0.6rem 0;
-    list-style: none;
+    border: 0;
+    background: none;
+    text-align: left;
     cursor: pointer;
   }
-  summary::-webkit-details-marker { display: none; }
-  summary .when { flex: 1; }
-  summary .tally { color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
-  .day-tasks { padding: 0 0 0.75rem; }
-  .day-tasks li { border: 0; }
-  .day-tasks .plain { min-height: 40px; padding: 0.35rem 0; color: var(--muted); font-size: 0.9375rem; }
-  .day-tasks .mark { width: 16px; height: 16px; }
-  .day-tasks .mark::after { left: 3px; top: 1px; width: 4px; height: 7px; }
+  .dayrow:hover .when { color: var(--ember); }
+  .dayrow .when { flex: none; min-width: 6.5rem; transition: color 0.15s var(--ease); }
+  .bar { flex: 1; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: calc(var(--r, 0) * 100%); background: var(--ember); }
+  .tally { flex: none; color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+
+  .back { padding: 0; margin-bottom: 0.75rem; }
+  .day-title { font-size: 1.25rem; margin: 0 0 0.25rem; }
+  .group { font-size: 0.9375rem; font-weight: 600; color: var(--muted); margin: 1.25rem 0 0.25rem; }
+  .day-tasks li { border-bottom: 1px solid var(--line); }
+  .day-tasks .plain { min-height: 44px; padding: 0.4rem 0; }
+  .day-tasks li.done .plain { color: var(--muted); }
+  .day-tasks .mark { width: 18px; height: 18px; }
+  .day-tasks .mark::after { left: 4px; top: 1px; width: 4px; height: 8px; }
   .day-tasks li.done .mark { background: var(--ember); border-color: var(--ember); }
   .day-tasks li.done .mark::after { transform: rotate(45deg) scale(1); }
 
@@ -535,10 +569,23 @@
   </section>
 
   <section id="view-history" aria-label="History" hidden>
-    <p class="lead" id="strip-lead">Last 30 days</p>
-    <div class="strip" id="strip" role="img"></div>
-    <div id="days"></div>
-    <p class="note" id="note-history" hidden></p>
+    <div id="history-all">
+      <p class="lead" id="grid-lead"></p>
+      <div class="weekdays" aria-hidden="true"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+      <div class="grid" id="grid" aria-label="Last five weeks"></div>
+      <ul id="days" class="days" aria-label="Past days"></ul>
+      <div class="actions"><button type="button" class="link" id="days-more" hidden>Show older days</button></div>
+      <p class="note" id="note-history" hidden></p>
+    </div>
+    <div id="history-day" hidden>
+      <button type="button" class="link back" id="history-back">All days</button>
+      <h2 class="day-title" id="day-title"></h2>
+      <p class="lead" id="day-tally"></p>
+      <h3 class="group" id="day-done-h"></h3>
+      <ul class="day-tasks" id="day-done"></ul>
+      <h3 class="group" id="day-open-h"></h3>
+      <ul class="day-tasks" id="day-open"></ul>
+    </div>
   </section>
 
   <section id="view-settings" aria-label="Settings" hidden>
@@ -746,6 +793,7 @@
 
   /* Views */
   function showView(name) {
+    if (name !== 'history') historyDay = null;
     view = name;
     for (const b of document.querySelectorAll('nav button')) {
       const on = b.dataset.view === name;
@@ -915,51 +963,88 @@
     return { done, total: tasks.length, text: `${done} of ${tasks.length}` };
   }
 
+  let historyDay = null;
+  let historyLimit = 30;
+  const dayState = tasks => !tasks || !tasks.length ? '' : tasks.every(x => x.d) ? 'lit' : tasks.some(x => x.d) ? 'part' : 'some';
+
   function renderHistory() {
-    const strip = $('strip');
-    strip.textContent = '';
-    let litDays = 0;
-    for (let n = 29; n >= 0; n--) {
+    $('history-all').hidden = !!historyDay;
+    $('history-day').hidden = !historyDay;
+    if (historyDay) return renderHistoryDay(historyDay);
+
+    // Five weeks ending today, Monday first.
+    const grid = $('grid');
+    grid.textContent = '';
+    const first = new Date(); first.setDate(first.getDate() - 34);
+    const lead = (first.getDay() + 6) % 7;
+    for (let i = 0; i < lead; i++) {
+      const sp = document.createElement('span'); sp.className = 'cell spacer'; grid.append(sp);
+    }
+    let litDays = 0, listed = 0;
+    for (let n = 34; n >= 0; n--) {
       const key = daysAgo(n);
       const tasks = state.days[key];
-      const dot = document.createElement('span');
-      dot.className = 'day-dot';
-      if (n === 0) dot.classList.add('today');
-      dot.style.setProperty('--i', 29 - n);
-      if (tasks && tasks.length) {
-        dot.classList.add('some');
-        if (tasks.some(x => x.d)) { dot.classList.add('lit'); litDays++; }
-      }
-      dot.title = `${dayLabel(key)}: ${tasks && tasks.length ? tally(tasks).text + ' finished' : 'nothing listed'}`;
-      strip.append(dot);
+      const st = dayState(tasks);
+      if (st) listed++;
+      if (st === 'lit') litDays++;
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'cell' + (st ? ' ' + st : '') + (n === 0 ? ' today' : '');
+      cell.style.setProperty('--i', 34 - n);
+      const t = tasks && tasks.length ? tally(tasks) : null;
+      cell.setAttribute('aria-label', `${dayLabel(key)}: ${t ? t.text + ' done' : 'nothing listed'}`);
+      cell.disabled = !t;
+      if (t) cell.addEventListener('click', () => { historyDay = key; renderHistory(); });
+      grid.append(cell);
     }
-    strip.setAttribute('aria-label', `Last 30 days: the ember was lit on ${litDays} of them.`);
-    $('strip-lead').textContent = `Last 30 days. Lit on ${litDays}.`;
+    $('grid-lead').textContent = listed
+      ? `${litDays} of the last ${listed} listed day${listed === 1 ? '' : 's'} fully done.`
+      : 'The last five weeks.';
 
+    const keys = Object.keys(state.days).filter(k => k < today() && state.days[k].length).sort().reverse();
     const wrap = $('days');
     wrap.textContent = '';
-    const keys = Object.keys(state.days).filter(k => k < today()).sort().reverse();
-    for (const key of keys) {
+    for (const key of keys.slice(0, historyLimit)) {
       const tasks = state.days[key];
-      if (!tasks.length) continue;
       const t = tally(tasks);
-      const details = document.createElement('details');
-      const summary = document.createElement('summary');
-      const dot = document.createElement('span');
-      dot.className = 'day-dot' + (t.done ? ' some lit' : ' some');
-      dot.setAttribute('aria-hidden', 'true');
+      const li = document.createElement('li');
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'dayrow';
+      row.setAttribute('aria-label', `${dayLabel(key)}, ${t.text} done. Open the day.`);
       const when = document.createElement('span');
       when.className = 'when';
       when.textContent = dayLabel(key);
+      const bar = document.createElement('span');
+      bar.className = 'bar';
+      const fill = document.createElement('i');
+      fill.style.setProperty('--r', (t.done / t.total).toFixed(3));
+      bar.append(fill);
       const count = document.createElement('span');
       count.className = 'tally';
       count.textContent = t.text;
-      summary.append(dot, when, count);
-      summary.setAttribute('aria-label', `${dayLabel(key)}, ${t.text} finished`);
+      row.append(when, bar, count);
+      row.addEventListener('click', () => { historyDay = key; renderHistory(); });
+      li.append(row);
+      wrap.append(li);
+    }
+    $('days-more').hidden = keys.length <= historyLimit;
+    const note = $('note-history');
+    note.hidden = keys.length > 0;
+    note.textContent = 'Nothing here yet. Tomorrow, today will be.';
+  }
 
-      const ul = document.createElement('ul');
-      ul.className = 'day-tasks';
-      for (const x of [...tasks.filter(a => a.d), ...tasks.filter(a => !a.d)]) {
+  function renderHistoryDay(key) {
+    const tasks = state.days[key] || [];
+    const t = tally(tasks);
+    $('day-title').textContent = longDate(key);
+    $('day-tally').textContent = t.done === t.total ? `All ${t.total} done.` : `${t.text} done.`;
+    const fill = (id, hid, items, label) => {
+      const ul = $(id);
+      ul.textContent = '';
+      $(hid).hidden = items.length === 0;
+      $(hid).textContent = `${label} (${items.length})`;
+      for (const x of items) {
         const li = document.createElement('li');
         if (x.d) li.classList.add('done');
         const p = document.createElement('span');
@@ -971,18 +1056,17 @@
         text.className = 'text';
         text.textContent = x.t;
         p.append(mark, text);
-        p.setAttribute('aria-label', (x.d ? 'Finished: ' : 'Not finished: ') + x.t);
         if (x.k) p.append(flameIcon('fuel-mark'));
+        p.setAttribute('aria-label', (x.d ? 'Done: ' : 'Not done: ') + x.t);
         li.append(p);
         ul.append(li);
       }
-      details.append(summary, ul);
-      wrap.append(details);
-    }
-    const note = $('note-history');
-    note.hidden = keys.length > 0;
-    note.textContent = 'No days behind you yet. Finish something today and it shows up here tomorrow.';
+    };
+    fill('day-done', 'day-done-h', tasks.filter(x => x.d), 'Done');
+    fill('day-open', 'day-open-h', tasks.filter(x => !x.d), 'Not done');
   }
+  $('history-back').addEventListener('click', () => { historyDay = null; renderHistory(); });
+  $('days-more').addEventListener('click', () => { historyLimit += 30; renderHistory(); });
 
   /* Data */
   function renderData(message) {
