@@ -17,9 +17,9 @@ Reading this as: a single-screen personal utility for one person, in a warm ultr
 
 ## Identity motif (owner direction, agent execution)
 
-Fire. The name sits small at the top like a native app title. Below it the hearth: a large flame, the one focal point on every screen, with two layers, an outer tongue and a paler inner one, each flickering at its own pace while the streak is alive, an outline when it is out. Its glow grows with how much of today is finished. Beside it, one line addressed to the person that changes with the streak ("Light it up." through "Nothing puts you out."), then the streak numeral. The same flame is the favicon. A small outline flame marks tasks that came from Fuel. History shows each day as a small ember, lit or not. Finishing a task throws five sparks off the mark. Lit and cold always differ in shape as well as colour.
+Fire. The name sits small at the top like a native app title. Below it the hearth: a large flame, the one focal point on every screen, with two layers, an outer tongue and a paler inner one, each flickering at its own pace while the streak is alive, an outline when it is out. Its glow grows with how much of today is finished. Beside it, one line addressed to the person that changes with the streak ("Light it up." through "Nothing puts you out."), then the streak numeral. The same flame is the favicon. A small outline flame marks tasks that came from Fuel. History shows each day as a small ember, lit or not. Finishing a task throws three sparks off the mark. Lit and cold always differ in shape as well as colour.
 
-The orange is used for: the lit flame, a finished task's mark, lit day embers, the active view's underline, and keyboard focus. Nowhere else.
+The orange is used for: the lit flame and its glow, a finished task's mark, lit and part-done day embers in History, the active view's icon on the phone bar, keyboard focus, and the one destructive button in a dialog. Nowhere else.
 
 ## Vocabulary
 
@@ -38,7 +38,7 @@ Warm paper, not white. Warm ink, not black. One accent.
 | Ink | #1d1a17 | #efe9e2 |
 | Muted text | #6e665e | #a39b92 |
 | Rule line | #e6e0d8 | #2a2622 |
-| Ember (accent) | #c9501c | #ff7a3d |
+| Ember (accent) | #bf4a1a | #ff7a3d |
 | Cold ember | hollow ring in Muted text colour | hollow ring in Muted text colour |
 
 Why warm: an ember belongs on paper, not on a screen-blue white. Why one accent: the streak is the only thing that needs to be noticed.
@@ -57,11 +57,7 @@ One column, max 30rem wide, generous top margin. Rows are separated by hairlines
 
 ## Motion (agent chosen)
 
-- New task: fades and slides in from the input, 220ms.
-- Finish: the mark fills and the text strikes, then the row glides to the bottom (FLIP), 260ms.
-- Remove: the row collapses, 200ms.
-- Ember: scales up once when the streak advances. Static glow while lit. Never pulses.
-- `prefers-reduced-motion: reduce` turns all of the above off.
+See Motion budget below. The flame's glow is a static blurred disc behind the SVG, so the flicker only moves transforms.
 
 ## Views
 
@@ -88,7 +84,7 @@ No fades on view switches, no ambient movement anywhere else. All of it is off u
 
 ## Data and consent
 
-A first-run dialog explains that everything stays in the browser and asks before anything is written. Settings shows exactly what is stored and offers export, stop, and erase.
+A first-run dialog explains that everything stays in the browser and asks before anything is written. Settings shows what is stored and offers export, import, stop, and erase. The first-run dialog stays by owner decision, recorded in the audit response.
 
 ## Dialogs
 
@@ -96,7 +92,7 @@ Every dialog looks like a dialog: a bordered panel with a shadow over a darkened
 
 ## Later days
 
-The one concession to planning ahead. Beside the input: an "Add for tomorrow" link, always visible, and a small calendar that opens the device's own date picker for any other day. Controls name the action, never just the destination. Cmd or Ctrl with Enter is Tomorrow on a keyboard. Under today's list, one muted line counts what is waiting; it opens into a plain list with a remove button per task, and closes again. Nothing about later days appears anywhere else.
+The one concession to planning ahead. Beside the input: an "Add for tomorrow" link, always visible, and a calendar button that opens the device's own date picker for any other day; the date input itself is out of the tab order. Controls name the action, never just the destination. Cmd or Ctrl with Enter is Tomorrow on a keyboard. Directly under the input, one muted line counts what is waiting, so the add is confirmed where it happened; it opens into a plain list with a remove button per task, and closes again.
 
 ## Tagline
 
@@ -116,4 +112,8 @@ Three layers, because a person asks three different questions of their past. The
 
 ## Today
 
-A date line at the top, in words, with the streak day next to it ("Saturday, 13 September. Day 4 of your streak."), so the page reads like the top of a journal entry.
+A date line at the top, in words, with the day's count beside it ("Saturday, 13 September. 3 left."). The streak is stated once, in the hearth, so no two lines can disagree about it. There is no Clear done: the row cross is the one way to remove, and a day's record is never rewritten after the fact.
+
+## Keyboard
+
+Finishing a task by keyboard keeps focus on that task after the list re-renders. Removing one moves focus to the next row, or the previous, or the input. A tab left open past midnight rolls the day by timer.
