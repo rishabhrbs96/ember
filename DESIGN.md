@@ -87,6 +87,14 @@ No fades on view switches, no ambient movement anywhere else. All of it is off u
 
 A first-run dialog explains that everything stays in the browser and asks before anything is written. Settings shows what is stored and offers export, import, stop, and erase. The first-run dialog stays by owner decision, recorded in the audit response.
 
+While nothing is being saved, a standing banner at the top of every view says so, with a Start saving link in it. It has an ember border because losing a list is the one real risk in the app. The same banner carries the storage-blocked message.
+
+Stop saving leaves the saved copy as it was at that moment and stops writing; it does not delete anything, and says so. Start saving compares this session's list with the saved copy. If they differ, a dialog asks which to keep: the saved copy (discarding the session's changes), a merge of both, or this session (replacing the copy). This session is the ember button because it overwrites.
+
+## Install offer
+
+Once, after the first-run question, where installing is possible, a dialog offers to put Ember on the home screen: an Install button where the browser provides one, the Share then Add to Home Screen steps on iPhone. Whatever the answer, it is not asked again; the Install row in Settings remains.
+
 ## Dialogs
 
 Every dialog looks like a dialog: a bordered panel with a shadow over a darkened, blurred page, a title phrased as the question, one paragraph, then the actions on their own row with the cancel on the left and the primary on the right. The browser's own confirm() is never used. A destructive primary is ember; every other primary is ink.

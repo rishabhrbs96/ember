@@ -447,6 +447,7 @@
   dialog p { margin: 0 0 0.75rem; color: var(--muted); }
   dialog form {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 0.5rem;
     padding: 1rem 1.5rem 1.25rem;
@@ -468,6 +469,19 @@
   .secondary:hover { border-color: var(--muted); }
 
   .note { color: var(--muted); margin: 2.5rem 0 0; text-align: center; }
+  /* A standing warning while nothing is being saved. Ember border because it is a real risk. */
+  .banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--ember);
+    border-radius: 3px;
+    font-size: 0.9375rem;
+  }
+  .banner .link { min-height: 32px; padding: 0; }
   .note.error { color: var(--ink); }
   .lead { color: var(--muted); margin: 0 0 1.25rem; }
   .date-line { margin: 0 0 0.75rem; font-family: var(--display); font-size: 1.0625rem; letter-spacing: 0.03em; }
@@ -601,6 +615,10 @@
   </symbol>
 </svg>
 <main>
+  <div class="banner" id="save-banner" role="status" hidden>
+    <span id="save-banner-text"></span>
+    <button type="button" class="link" id="save-banner-btn">Start saving</button>
+  </div>
   <header>
     <div class="topbar">
       <div class="brand"><h1 class="wordmark">Ember</h1><p class="tagline">Keep the fire within</p></div>
@@ -754,6 +772,31 @@
     <button type="submit" value="no" class="secondary">Cancel</button>
     <button type="submit" value="merge" class="secondary">Merge</button>
     <button type="submit" value="replace" class="primary danger">Replace</button>
+  </form>
+</dialog>
+
+<dialog id="resume-dialog" aria-labelledby="resume-title">
+  <div class="dialog-body">
+    <h2 id="resume-title">Which list do you want to keep?</h2>
+    <p>This session’s list differs from the copy saved on this device.</p>
+    <p>Saved copy discards what changed since saving stopped. Merge keeps both. This session replaces the saved copy.</p>
+  </div>
+  <form method="dialog">
+    <button type="submit" value="no" class="secondary">Cancel</button>
+    <button type="submit" value="saved" class="secondary">Saved copy</button>
+    <button type="submit" value="merge" class="secondary">Merge</button>
+    <button type="submit" value="session" class="primary danger">This session</button>
+  </form>
+</dialog>
+
+<dialog id="install-dialog" aria-labelledby="install-title">
+  <div class="dialog-body">
+    <h2 id="install-title">Put Ember on your home screen?</h2>
+    <p id="install-dialog-text"></p>
+  </div>
+  <form method="dialog">
+    <button type="submit" value="no" class="secondary" id="install-dialog-no">Not now</button>
+    <button type="submit" value="yes" class="primary" id="install-dialog-yes">Install Ember</button>
   </form>
 </dialog>
 
@@ -1055,13 +1098,7 @@
     renderList($('list-today'), [...open, ...done], taskRow, enterId);
 
     const note = $('note-today');
-    if (storageBroken) {
-      note.textContent = 'Your browser is blocking storage. This list lasts until you close the tab. If this is a private window, try a normal one.';
-      note.className = 'note error'; note.hidden = false;
-    } else if (!state.consent && !$('consent').open) {
-      note.textContent = 'Not saving to this device. This list lasts until you close the tab. To keep it, press Start saving under Settings.';
-      note.className = 'note error'; note.hidden = false;
-    } else note.hidden = true;
+    note.hidden = true;
 
 
     const { n, todayDone } = streak();
@@ -1246,7 +1283,7 @@
 
   /* Install. The browser decides what is possible; the row says the right thing for it. */
   let installPrompt = null;
-  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (view === 'settings') renderInstall(); });
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (view === 'settings') renderInstall(); maybeOfferInstall(); });
   window.addEventListener('appinstalled', () => { installPrompt = null; if (view === 'settings') renderInstall(); });
   function renderInstall() {
     const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -1259,6 +1296,34 @@
     else if (ios) text.textContent = 'In Safari, tap Share, then “Add to Home Screen”. Ember opens like an app and works offline.';
     else if (location.protocol === 'file:') text.textContent = 'Installing needs Ember served over HTTPS, not opened as a file.';
     else text.textContent = 'In your browser’s menu, choose “Install app” or “Add to Home Screen”. Ember opens like an app and works offline.';
+  }
+  // Offered once, after the first-run question, and only where installing is possible.
+  let installOffered = false;
+  function maybeOfferInstall() {
+    if (installOffered || state.installAsked) return;
+    if (document.querySelector('dialog[open]')) return;
+    const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (standalone || location.protocol === 'file:') return;
+    if (!installPrompt && !ios) return;
+    installOffered = true;
+    state.installAsked = 1;
+    save();
+    const dlg = $('install-dialog');
+    $('install-dialog-text').textContent = installPrompt
+      ? 'It opens like an app and works offline. You can also do this later under Settings.'
+      : 'In Safari, tap Share, then “Add to Home Screen”. Ember opens like an app and works offline.';
+    $('install-dialog-yes').hidden = !installPrompt;
+    $('install-dialog-no').textContent = installPrompt ? 'Not now' : 'Got it';
+    dlg.addEventListener('close', async () => {
+      if (dlg.returnValue === 'yes' && installPrompt) {
+        installPrompt.prompt();
+        await installPrompt.userChoice;
+        installPrompt = null;
+        if (view === 'settings') renderInstall();
+      }
+    }, { once: true });
+    dlg.showModal();
   }
   $('install-btn').addEventListener('click', async () => {
     if (!installPrompt) return;
@@ -1284,17 +1349,37 @@
     note.hidden = !message;
     note.textContent = message || '';
   }
+  /* Stop leaves the saved copy as it is and stops writing. Start compares this session with
+     that copy and, if they differ, asks which to keep. */
+  const listShape = x => JSON.stringify({ d: x.days, f: x.fuel, b: x.streak && x.streak.best });
+  function readSaved() {
+    try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 2 && s.days ? s : null; } catch { return null; }
+  }
+  async function startSaving() {
+    const saved = readSaved();
+    if (saved && listShape(saved) !== listShape(state)) {
+      const dlg = $('resume-dialog');
+      const choice = await new Promise(resolve => { dlg.addEventListener('close', () => resolve(dlg.returnValue), { once: true }); dlg.showModal(); });
+      if (choice === 'saved') state = { ...saved, consent: today(), theme: state.theme, rolled: state.rolled };
+      else if (choice === 'merge') mergeInto(state, saved);
+      else if (choice !== 'session') return;
+      ensureToday();
+      streak();
+    }
+    state.consent = today();
+    save();
+    applyTheme();
+    render();
+    if (view === 'settings') renderData(storageBroken ? 'Your browser is blocking storage, so nothing was saved. If this is a private window, try a normal one.' : 'Started.');
+  }
   $('data-toggle').addEventListener('click', async () => {
     if (state.consent) {
-      if (!await ask('Stop saving to this device?', 'The saved copy will be removed from this browser. This list lasts until you close the tab.', 'Stop saving')) return;
+      if (!await ask('Stop saving to this device?', 'The saved copy stays as it is now. Nothing from here on is saved until you start again. To remove the copy, use Erase everything.', 'Stop saving')) return;
       state.consent = null;
-      try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); } catch {}
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+      render();
       renderData('Stopped. This list lasts until you close the tab.');
-    } else {
-      state.consent = today();
-      save();
-      renderData(storageBroken ? 'Your browser is blocking storage, so nothing was saved. If this is a private window, try a normal one.' : 'Started.');
-    }
+    } else startSaving();
   });
   /* Import. The file is checked field by field; anything malformed is dropped and counted. */
   function validateImport(raw) {
@@ -1401,7 +1486,23 @@
     renderData('Erased.');
   });
 
+  function renderBanner() {
+    const banner = $('save-banner');
+    const btn = $('save-banner-btn');
+    if (storageBroken) {
+      $('save-banner-text').textContent = 'Your browser is blocking storage. This list lasts until you close the tab. If this is a private window, try a normal one.';
+      btn.hidden = true;
+      banner.hidden = false;
+    } else if (!state.consent && !$('consent').open) {
+      $('save-banner-text').textContent = 'Not saving to this device. This list lasts until you close the tab.';
+      btn.hidden = false;
+      banner.hidden = false;
+    } else banner.hidden = true;
+  }
+  $('save-banner-btn').addEventListener('click', () => startSaving());
+
   function render(opts = {}) {
+    renderBanner();
     renderHearth();
     if (view === 'today') renderToday(opts.enterId);
     if (view === 'fuel') renderFuel(opts.enterId);
@@ -1432,6 +1533,7 @@
       if (dlg.returnValue === 'yes') { state.consent = today(); save(); }
       render();
       if (matchMedia('(hover: hover)').matches) $('new-today').focus();
+      maybeOfferInstall();
     }, { once: true });
     dlg.showModal();
   }
@@ -1592,7 +1694,8 @@
   if (ensureToday()) save();
   applyTheme();
   showView('today');
-  if (!storageBroken && !state.consent) askConsent();
+  if (!storageBroken && !state.consent && !readSaved()) askConsent();
+  else maybeOfferInstall();
 })();
 </script>
 </body>

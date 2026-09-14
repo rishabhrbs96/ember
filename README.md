@@ -19,7 +19,7 @@ The line beside the flame changes with your streak, from "Light it up." to "Noth
 
 ## Install it as an app
 
-Ember is a web app that installs like a native one, with no store in between. Open the site, go to Settings, and follow the Install row: it shows an Install button where the browser offers one (Chrome, Edge, Android), and the Share then Add to Home Screen steps on iPhone and iPad. Once installed it opens full screen from the home screen and works offline.
+Ember is a web app that installs like a native one, with no store in between. On first open it offers to install, once. After that, go to Settings and follow the Install row: it shows an Install button where the browser offers one (Chrome, Edge, Android), and the Share then Add to Home Screen steps on iPhone and iPad. Once installed it opens full screen from the home screen and works offline.
 
 For that to work the site has to be served over https. GitHub Pages does this for free: in the repository settings, under Pages, choose the main branch and the root folder.
 
@@ -37,7 +37,7 @@ then open http://localhost:8765.
 
 ## Your data
 
-Ember asks once, on first run, before it writes anything to your browser. Say no and the list lives in memory until you close the tab. You can change your mind under Settings.
+Ember asks once, on first run, before it writes anything to your browser. Say no and the list lives in memory until you close the tab, with a banner at the top reminding you. Stop saving keeps the saved copy as it is and stops writing; Start saving asks which list to keep if the two have drifted apart: the saved copy, a merge, or this session.
 
 What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days older than two years are dropped. Nothing is transmitted anywhere. There are no cookies and no analytics. The two typefaces ship with the app, so not even a font request leaves your device.
 
