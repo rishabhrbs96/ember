@@ -1,7 +1,7 @@
 // Offline copy of Ember. The page itself is fetched network-first so updates land
 // on the next open; icons and the manifest are served from cache.
-const CACHE = 'ember-4';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './fonts/federo.woff2', './fonts/poiret-one.woff2'];
+const CACHE = 'ember-5';
+const FILES = ['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './fonts/federo.woff2', './fonts/poiret-one.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

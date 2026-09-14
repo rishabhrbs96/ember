@@ -6,6 +6,8 @@
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="Ember. Keep the fire within. A todo list that stays in your browser and keeps your streak alive.">
 <title>Ember</title>
+<link rel="preload" href="fonts/federo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/poiret-one.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -87,11 +89,25 @@
   .tagline { margin: 0; font-family: var(--body); font-size: 0.8125rem; letter-spacing: 0.08em; color: var(--muted); white-space: nowrap; }
   @media (max-width: 400px) { .tagline { display: none; } }
   .hearth {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 1rem;
     min-width: 0;
   }
+  .glow {
+    position: absolute;
+    left: -8px; top: 50%;
+    width: 72px; height: 72px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--ember-glow) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+    pointer-events: none;
+  }
+  .glow.warm { opacity: var(--heat, 0.5); }
+  .glow.lit { opacity: 1; }
   .hearth-text { min-width: 0; }
   .slogan {
     margin: 0 0 0.25rem;
@@ -100,13 +116,13 @@
   }
   .slogan.swap { animation: fadeIn 0.4s var(--ease); }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } }
-  .streak-line { display: flex; align-items: baseline; gap: 0.1rem; margin: 0; }
+  .streak-line { display: flex; align-items: baseline; gap: 0.1rem; margin: 0; min-height: 1.6rem; }
   .flame {
     width: 56px; height: 56px;
     flex: none;
+    position: relative;
     overflow: visible;
     transform-origin: 50% 90%;
-    transition: filter 0.4s var(--ease);
   }
   .flame path {
     transform-box: fill-box;
@@ -117,8 +133,6 @@
   .flame .inner { fill: var(--paper); opacity: 0; }
   /* warm: the streak is alive but today's list is not finished. lit: today is done. */
   .flame.warm .outer { fill: var(--ember); fill-opacity: 0.4; stroke: var(--ember); }
-  .flame.warm { filter: drop-shadow(0 0 var(--glow, 6px) var(--ember-glow)); }
-  .flame.lit { filter: drop-shadow(0 0 14px var(--ember-glow)); }
   .flame.lit .outer { fill: var(--ember); stroke: var(--ember); animation: flicker 2.8s ease-in-out infinite; }
   .flame.lit .inner { opacity: 0.85; animation: flicker 1.9s ease-in-out infinite reverse; }
   @keyframes flicker {
@@ -131,7 +145,7 @@
   @keyframes settle { 40% { transform: scale(0.8); } }
   @keyframes flare {
     0%   { transform: scale(1); }
-    35%  { transform: scale(1.5); filter: drop-shadow(0 0 18px var(--ember-glow)); }
+    35%  { transform: scale(1.5); }
     100% { transform: scale(1); }
   }
   .count {
@@ -382,7 +396,7 @@
     transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
   }
   .choice:hover { color: var(--ink); }
-  .choice[aria-pressed="true"] { color: var(--ink); border-color: var(--ember); }
+  .choice[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
   .facts { margin: 0 0 1.5rem; }
   .facts div {
     display: flex;
@@ -513,7 +527,7 @@
     text-align: left;
     cursor: pointer;
   }
-  .dayrow:hover .when { color: var(--ember); }
+  .dayrow:hover .when { color: var(--ink); }
   .dayrow .when { flex: 1; transition: color 0.15s var(--ease); }
   .tally { flex: none; color: var(--muted); font-size: 1rem; font-variant-numeric: tabular-nums; }
 
@@ -576,6 +590,7 @@
       <button type="button" class="theme" id="theme"></button>
     </div>
     <div class="hearth">
+      <span class="glow" id="glow" aria-hidden="true"></span>
       <svg class="flame" id="flame" viewBox="0 0 24 24" aria-hidden="true">
         <path class="outer" d="M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z"/>
         <path class="inner" d="M12 11.5c.5 2 2.4 3 2.4 5.1a2.4 2.4 0 0 1-4.8 0c0-1.4 1-2.3 1.3-2.9.1.9.4 1.3.9 1.4.2-1.2-.1-2.4.2-3.6z"/>
@@ -609,7 +624,7 @@
   <section id="view-today" aria-label="Today">
     <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span></p>
     <form id="form-today" class="field-row" autocomplete="off">
-      <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
+      <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus maxlength="200">
       <button type="button" class="later" id="later" title="Add this to tomorrow’s list (Cmd or Ctrl + Enter)"><span class="long">Add for tomorrow</span><span class="short">For tomorrow</span></button>
       <span class="pick-day">
         <button type="button" id="pick-day-btn" aria-label="Add this to a later day" title="Add this to a later day">
@@ -625,9 +640,9 @@
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
-    <p class="lead">Fuel goes on the fire every morning. Whatever you add here is on every new day’s list.</p>
+    <p class="lead">Whatever you add here is on every new day’s list.</p>
     <form id="form-fuel" autocomplete="off">
-      <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New fuel item" enterkeyhint="done" maxlength="200">
+      <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New fuel item" maxlength="200">
     </form>
     <ul id="list-fuel" aria-label="Fuel items"></ul>
     <p class="note" id="note-fuel" hidden></p>
@@ -859,7 +874,10 @@
     const flame = $('flame');
     flame.classList.toggle('lit', todayDone);
     flame.classList.toggle('warm', alive && !todayDone);
-    flame.style.setProperty('--glow', (4 + 10 * ratio).toFixed(1) + 'px');
+    const glow = $('glow');
+    glow.classList.toggle('lit', todayDone);
+    glow.classList.toggle('warm', alive && !todayDone);
+    glow.style.setProperty('--heat', (0.3 + 0.7 * ratio).toFixed(2));
 
     const count = $('count');
     count.hidden = !alive;
@@ -931,7 +949,7 @@
     toggle.type = 'button';
     toggle.className = 'toggle';
     toggle.setAttribute('aria-pressed', String(!!t.d));
-    toggle.setAttribute('aria-label', (t.d ? 'Finished: ' : 'Finish: ') + t.t + (t.k ? ' (fuel)' : ''));
+    toggle.setAttribute('aria-label', t.t + (t.k ? ' (fuel)' : ''));
     const mark = document.createElement('span');
     mark.className = 'mark';
     const text = document.createElement('span');
@@ -1020,7 +1038,6 @@
     li.dataset.id = k.id;
     const p = document.createElement('span');
     p.className = 'plain';
-    p.append(flameIcon('fuel-mark'));
     const text = document.createElement('span');
     text.textContent = k.text;
     p.append(text);
