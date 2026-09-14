@@ -109,7 +109,7 @@ Fuel is the list of things you do every day. Anything on it is added to every ne
 
 ## Voice
 
-Notices are written the way a careful friend would say them, in full sentences with contractions, never as system messages. "Ember isn't saving right now. Close this tab and this list is gone." rather than "Not saving to this device." Every notice says what is true and what to do about it.
+Professional and calm, in the register of a well-run private service. Complete sentences, plain words, no slang, no exclamation, contractions only where the sentence would sound stiff without one. Each notice states what is true and what the person can do: "Saving is off. This list will be lost when the tab is closed." Buttons name the action they perform. Work is "completed", never "done"; data is "removed", never "gone".
 
 ## Tagline
 
