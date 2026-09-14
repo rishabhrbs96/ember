@@ -63,11 +63,11 @@ See Motion budget below. The flame's glow is a static blurred disc behind the SV
 
 One screen, four views: Today, Fuel, History, Settings. Today is default because the app's whole job is today.
 
-On wide screens the views are a segmented control under the hearth, the active segment filled with ink so there is no ambiguity in either theme. On phones (under 700px) the same control becomes a fixed bar at the bottom of the screen, where thumbs are, each view an icon over a label, the active icon in ember. On watches the labels hide and the icons stay. The four icons are drawn for this app: a checked circle, the flame, three dots for the strip of days, two sliders.
+On wide screens the views are a segmented control under the hearth; the active segment is tinted with the rule colour and its icon turns ember, so the state reads at a glance without a block of ink outweighing the flame. On phones (under 700px) the same control becomes a fixed bar at the bottom of the screen, where thumbs are, each view an icon over a label, the active icon in ember. On watches the labels hide and the icons stay. The four icons are drawn for this app: a checked circle, the flame, three dots for the strip of days, two sliders.
 
 ## Sizes
 
-Type scales with the device through the root font size: 87.5% under 290px (watches), 93.75% under 400px (phones), 106.25% above 900px, 118.75% above 1600px. The column widens from 30rem to 34rem on wide screens. Nav wraps on watches. Nothing else changes shape, because the layout is one column everywhere.
+Type scales with the device through the root font size: 87.5% under 290px (watches), 93.75% under 400px (phones), 106.25% above 900px, 118.75% above 1600px. The column widens from 30rem to 34rem on wide screens. Nav labels hide on watches and the icons stay. Nothing else changes shape, because the layout is one column everywhere.
 
 ## Motion budget
 
@@ -79,6 +79,7 @@ Motion only where it shows cause and effect. Every animation is transform, opaci
 - Focus the input: the ember underline draws in from the left.
 - Open History: 35 embers fill in over 210ms, left to right, like days passing.
 - The flame flickers while lit and its glow tracks today's completion.
+- The slogan fades in when it changes.
 
 No fades on view switches, no ambient movement anywhere else. All of it is off under prefers-reduced-motion.
 
@@ -108,7 +109,7 @@ Ember installs as an app through the web app manifest and a service worker. The 
 
 ## History
 
-Three layers, because a person asks three different questions of their past. The five-week grid answers "how consistent am I", each day an ember: faint when nothing was listed, hollow when nothing got done, ember ring when some did, filled when all of it did. The rows answer "how did a given day go", with a bar and a tally. A page per day answers "what exactly happened", grouped into done and not done, so a long list never has to fold into an accordion. Older days load thirty at a time.
+Three layers, because a person asks three different questions of their past. The five-week grid is one Tab stop; arrow keys walk the days. It answers "how consistent am I", each day an ember: faint when nothing was listed, hollow when nothing got done, ember ring when some did, filled when all of it did. The rows answer "how did a given day go", with a bar and a tally. A page per day answers "what exactly happened", grouped into done and not done, so a long list never has to fold into an accordion. Older days load thirty at a time.
 
 ## Today
 
@@ -117,3 +118,7 @@ A date line at the top, in words, with the day's count beside it ("Saturday, 13 
 ## Keyboard
 
 Finishing a task by keyboard keeps focus on that task after the list re-renders. Removing one moves focus to the next row, or the previous, or the input. A tab left open past midnight rolls the day by timer.
+
+## Streak on day one
+
+A day that was fully done stays lit for streak purposes even if a task is added afterwards: the flame goes warm, not out, and the count holds. Without this, day one, the day that decides whether a person comes back, would show "No streak yet" the moment they added one more thing.

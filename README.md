@@ -53,6 +53,8 @@ What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days
 
 - Type and press Enter to add. Escape clears the box.
 - Tab to a task, Enter or Space to finish it. Focus stays on the task; the next stop is its remove button.
+- Escape closes any dialog.
+- In History, Tab reaches the grid once; arrow keys move between days.
 - Dim and Bright switch the theme from the header or Settings. Without a choice, Ember follows your OS.
 
 ## Sizes
