@@ -63,7 +63,7 @@ One column from a watch face to a wide monitor. On phones the views sit in a bar
 
 ## Design
 
-See [DESIGN.md](DESIGN.md) for the direction, palette, and motion rules. The UI was built under the [anti-slop](https://github.com/miqdadbadjuber/anti-slop) rules.
+The UI was built under the [anti-slop](https://github.com/miqdadbadjuber/anti-slop) rules.
 
 ## License
 
