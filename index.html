@@ -617,7 +617,7 @@
 <main>
   <div class="banner" id="save-banner" role="status" hidden>
     <span id="save-banner-text"></span>
-    <button type="button" class="link" id="save-banner-btn">Start saving</button>
+    <button type="button" class="link" id="save-banner-btn">Save my list</button>
   </div>
   <header>
     <div class="topbar">
@@ -731,7 +731,7 @@
     <section class="group-block" aria-labelledby="h-data">
       <h2 id="h-data">Your data</h2>
       <div class="group-body">
-        <p class="lead">Everything Ember knows lives in this browser and nowhere else. Days older than two years are dropped.</p>
+        <p class="lead">Everything Ember knows lives here in your browser and nowhere else. Days older than two years quietly fall away.</p>
         <dl class="facts">
           <div><dt>Saving to this device</dt><dd id="data-consent"></dd></div>
           <div><dt>Space used</dt><dd id="data-size"></dd></div>
@@ -753,8 +753,8 @@
 <dialog id="consent" aria-labelledby="consent-title">
   <div class="dialog-body">
     <h2 id="consent-title">Keep your list on this device?</h2>
-    <p>Ember keeps your tasks, streak, and theme in this browser. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
-    <p>You can export or erase all of it any time under Settings.</p>
+    <p>Ember keeps your tasks, your streak and your theme right here in this browser. Nothing leaves your device. No account, no cookies, no tracking.</p>
+    <p>Export it or erase it whenever you like, under Settings.</p>
   </div>
   <form method="dialog">
     <button type="submit" value="no" class="secondary">Not now</button>
@@ -777,21 +777,21 @@
 
 <dialog id="resume-dialog" aria-labelledby="resume-title">
   <div class="dialog-body">
-    <h2 id="resume-title">Which list do you want to keep?</h2>
-    <p>This session’s list differs from the copy saved on this device.</p>
-    <p>Saved copy discards what changed since saving stopped. Merge keeps both. This session replaces the saved copy.</p>
+    <h2 id="resume-title">Two versions of your list</h2>
+    <p>Your list here has changed since Ember last saved it. Which one should it keep?</p>
+    <p>The saved one drops what you changed here. Both keeps everything from each. This one replaces what was saved.</p>
   </div>
   <form method="dialog">
     <button type="submit" value="no" class="secondary">Cancel</button>
-    <button type="submit" value="saved" class="secondary">Saved copy</button>
-    <button type="submit" value="merge" class="secondary">Merge</button>
-    <button type="submit" value="session" class="primary danger">This session</button>
+    <button type="submit" value="saved" class="secondary">The saved one</button>
+    <button type="submit" value="merge" class="secondary">Both</button>
+    <button type="submit" value="session" class="primary danger">This one</button>
   </form>
 </dialog>
 
 <dialog id="install-dialog" aria-labelledby="install-title">
   <div class="dialog-body">
-    <h2 id="install-title">Put Ember on your home screen?</h2>
+    <h2 id="install-title">Ember on your home screen?</h2>
     <p id="install-dialog-text"></p>
   </div>
   <form method="dialog">
@@ -1218,7 +1218,7 @@
     const anyEver = Object.keys(state.days).some(k => k < today() && state.days[k].length);
     const note = $('note-history');
     note.hidden = anyEver;
-    note.textContent = 'No past days yet. Today becomes one tomorrow.';
+    note.textContent = 'No days behind you yet. Come back tomorrow and today will be here.';
   }
   $('month-prev').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, -1); renderHistory(); });
   $('month-next').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, 1); renderHistory(); });
@@ -1311,7 +1311,7 @@
     save();
     const dlg = $('install-dialog');
     $('install-dialog-text').textContent = installPrompt
-      ? 'It opens like an app and works offline. You can also do this later under Settings.'
+      ? 'It opens like an app, works offline, and is one tap away. You can do this later under Settings, too.'
       : 'In Safari, tap Share, then “Add to Home Screen”. Ember opens like an app and works offline.';
     $('install-dialog-yes').hidden = !installPrompt;
     $('install-dialog-no').textContent = installPrompt ? 'Not now' : 'Got it';
@@ -1370,15 +1370,15 @@
     save();
     applyTheme();
     render();
-    if (view === 'settings') renderData(storageBroken ? 'Your browser is blocking storage, so nothing was saved. If this is a private window, try a normal one.' : 'Started.');
+    if (view === 'settings') renderData(storageBroken ? 'Your browser won’t let Ember save anything here. Private windows do that. A normal window won’t.' : 'Saving again.');
   }
   $('data-toggle').addEventListener('click', async () => {
     if (state.consent) {
-      if (!await ask('Stop saving to this device?', 'The saved copy stays as it is now. Nothing from here on is saved until you start again. To remove the copy, use Erase everything.', 'Stop saving')) return;
+      if (!await ask('Stop saving?', 'What’s saved so far stays safe. Ember just stops writing from here, so anything you add after this lives only until you close the tab. To wipe the saved copy, use Erase everything.', 'Stop saving')) return;
       state.consent = null;
       try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
       render();
-      renderData('Stopped. This list lasts until you close the tab.');
+      renderData('Saving is off. This list stays until you close the tab.');
     } else startSaving();
   });
   /* Import. The file is checked field by field; anything malformed is dropped and counted. */
@@ -1471,10 +1471,10 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    renderData('Exported. The file holds every day, every Fuel item, and the streak.');
+    renderData('Exported. That file holds every day, every Fuel item and your streak.');
   });
   $('data-erase').addEventListener('click', async () => {
-    if (!await ask('Erase everything?', 'Every task, Fuel item, past day, and the streak will be removed from this browser. This cannot be undone.', 'Erase everything')) return;
+    if (!await ask('Erase everything?', 'Every task, every Fuel item, every past day and your streak, gone from this browser for good.', 'Erase everything')) return;
     const consent = state.consent;
     state = fresh();
     state.consent = consent;
@@ -1490,11 +1490,11 @@
     const banner = $('save-banner');
     const btn = $('save-banner-btn');
     if (storageBroken) {
-      $('save-banner-text').textContent = 'Your browser is blocking storage. This list lasts until you close the tab. If this is a private window, try a normal one.';
+      $('save-banner-text').textContent = 'Your browser won’t let Ember save anything here, so this list disappears when you close the tab. Private windows do that. A normal window won’t.';
       btn.hidden = true;
       banner.hidden = false;
     } else if (!state.consent && !$('consent').open) {
-      $('save-banner-text').textContent = 'Not saving to this device. This list lasts until you close the tab.';
+      $('save-banner-text').textContent = 'Ember isn’t saving right now. Close this tab and this list is gone.';
       btn.hidden = false;
       banner.hidden = false;
     } else banner.hidden = true;
