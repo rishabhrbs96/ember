@@ -101,7 +101,15 @@ Every dialog looks like a dialog: a bordered panel with a shadow over a darkened
 
 ## Later days
 
-The one concession to planning ahead. Beside the input: an "Add for tomorrow" link, always visible, and a calendar button that opens the device's own date picker for any other day; the date input itself is out of the tab order. Controls name the action, never just the destination. Cmd or Ctrl with Enter is Tomorrow on a keyboard. Directly under the input, one muted line counts what is waiting, so the add is confirmed where it happened; it opens into a plain list with a remove button per task, and closes again.
+Under the box, a row of chips: Add to Today, Tomorrow, Another day. You choose the day first, then type and press Enter, so the intent is visible before the task goes anywhere. The placeholder follows the choice ("What will you do tomorrow?"). Another day opens the device's own date picker and the chip then shows the chosen date. After each add the row resets to Today. Cmd or Ctrl with Enter still means tomorrow. Under the date line, a count of what is waiting opens into a plain list with a remove button per task.
+
+## Fuel, explained
+
+Fuel is the list of things you do every day. Anything on it is added to every new day's list automatically, so you never type "Stretch" twice. The Fuel view says this in one sentence at the top, and its empty state suggests two examples.
+
+## Voice
+
+Notices are written the way a careful friend would say them, in full sentences with contractions, never as system messages. "Ember isn't saving right now. Close this tab and this list is gone." rather than "Not saving to this device." Every notice says what is true and what to do about it.
 
 ## Tagline
 

@@ -245,36 +245,25 @@
   }
   .field::placeholder { color: var(--muted); opacity: 1; }
   .field-row { display: flex; align-items: flex-end; gap: 0.5rem; }
-  .later {
-    flex: none;
-    min-height: 44px;
-    padding: 0 0.25rem;
-    border: 0;
+  /* Which day: a row of chips under the box. You pick the day, then press Enter. */
+  .when { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0.6rem 0 1.1rem; }
+  .when-label { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-right: 0.2rem; }
+  .chip {
+    min-height: 34px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
     background: none;
     color: var(--muted);
-    font-size: 0.9375rem;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: color 0.15s var(--ease);
+    transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
   }
-  .later:hover { color: var(--ink); }
-  .later .short { display: none; }
-  @media (max-width: 400px) { .later .long { display: none; } .later .short { display: inline; } }
-  .pick-day {
-    position: relative;
-    flex: none;
-    width: 44px;
-    min-height: 44px;
-    display: grid;
-    place-items: center;
-    color: var(--muted);
-    cursor: pointer;
-    transition: color 0.15s var(--ease);
-  }
-  .pick-day button { width: 44px; min-height: 44px; display: grid; place-items: center; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
-  .pick-day button:hover { color: var(--ink); }
-  .pick-day svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+  .chip:hover { color: var(--ink); }
+  .chip[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
+  .pick-day { position: relative; display: inline-block; }
   .pick-day input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
   .ahead-toggle { padding: 0; border: 0; background: none; color: var(--muted); font-family: var(--body); font-size: 1rem; letter-spacing: 0.01em; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .ahead-toggle:hover { color: var(--ink); }
@@ -658,26 +647,30 @@
 
   <section id="view-today" aria-label="Today">
     <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span> <button type="button" class="ahead-toggle" id="ahead-toggle" hidden aria-expanded="false" aria-controls="list-ahead"></button></p>
-    <form id="form-today" class="field-row" autocomplete="off">
-      <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus maxlength="200">
-      <button type="button" class="later" id="later" title="Add this to tomorrow’s list (Cmd or Ctrl + Enter)"><span class="long">Add for tomorrow</span><span class="short">For tomorrow</span></button>
+    <form id="form-today" autocomplete="off">
+      <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task" autofocus maxlength="200">
+    </form>
+    <div class="when" role="group" aria-label="Which day to add it to">
+      <span class="when-label">Add to</span>
+      <button type="button" class="chip" data-when="today" aria-pressed="true">Today</button>
+      <button type="button" class="chip" data-when="tomorrow" aria-pressed="false">Tomorrow</button>
       <span class="pick-day">
-        <button type="button" id="pick-day-btn" aria-label="Add this to a later day" title="Add this to a later day">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
-        </button>
+        <button type="button" class="chip" id="pick-day-btn" aria-pressed="false">Another day</button>
         <input type="date" id="pick-day" tabindex="-1" aria-hidden="true">
       </span>
-    </form>
+    </div>
     <ul id="list-ahead" class="ahead" hidden aria-label="Tasks for later days"></ul>
     <ul id="list-today" aria-label="Today's tasks"></ul>
     <p class="note" id="note-today" hidden></p>
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
+    <p class="lead">Fuel is what you do every day. Add something here once and it shows up on every new day’s list, ready to tick off.</p>
     <form id="form-fuel" autocomplete="off">
       <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New Fuel item" maxlength="200">
     </form>
     <ul id="list-fuel" aria-label="Fuel items"></ul>
+    <p class="note" id="note-fuel" hidden></p>
   </section>
 
   <section id="view-history" aria-label="History" hidden>
@@ -1134,6 +1127,9 @@
   }
   function renderFuel(enterId) {
     renderList($('list-fuel'), state.fuel, fuelRow, enterId);
+    const note = $('note-fuel');
+    note.hidden = state.fuel.length > 0;
+    note.textContent = 'Nothing on the fire yet. Try “Stretch” or “Read ten pages”.';
 
   }
 
@@ -1582,46 +1578,52 @@
     });
     $(inputId).addEventListener('keydown', e => {
       if (e.key === 'Escape') e.target.value = '';
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && inputId === 'new-today') { e.preventDefault(); addForTomorrow(); return; }
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && inputId === 'new-today') { e.preventDefault(); setWhen('tomorrow'); $(formId).requestSubmit(); return; }
       if (e.key === 'Enter') { e.preventDefault(); $(formId).requestSubmit(); }
     });
   }
   // The prompt shortens on narrow screens so it never truncates beside the later-day controls.
   const narrow = matchMedia('(max-width: 400px)');
   const tiny = matchMedia('(max-width: 300px)');
-  const prompt = () => tiny.matches ? 'Add a task' : narrow.matches ? 'What will you do?' : 'What will you do today?';
-  tiny.addEventListener('change', () => resetPrompt());
-  const resetPrompt = () => { $('new-today').placeholder = prompt(); };
+  const prompt = () => {
+    if (addWhen === 'tomorrow') return 'What will you do tomorrow?';
+    if (addWhen === 'picked' && pickedKey) return `What will you do on ${dayLabel(pickedKey)}?`;
+    return tiny.matches ? 'Add a task' : narrow.matches ? 'What will you do?' : 'What will you do today?';
+  };
+  function resetPrompt() { $('new-today').placeholder = prompt(); }
+  tiny.addEventListener('change', resetPrompt);
   narrow.addEventListener('change', resetPrompt);
   resetPrompt();
 
-  // Later days. Tomorrow is one press; any other day goes through the native date picker.
-  function addForDay(key, hint) {
-    const input = $('new-today');
-    const text = input.value.trim();
-    if (!text) { input.placeholder = hint; input.focus(); return; }
+  // Which day the box adds to. Today unless a chip says otherwise; resets to Today after each add.
+  let addWhen = 'today';
+  let pickedKey = null;
+  function setWhen(which, key) {
+    addWhen = which;
+    pickedKey = which === 'picked' ? key : null;
+    for (const c of document.querySelectorAll('.chip[data-when]')) c.setAttribute('aria-pressed', String(c.dataset.when === which));
+    const pick = $('pick-day-btn');
+    pick.setAttribute('aria-pressed', String(which === 'picked'));
+    pick.textContent = which === 'picked' ? dayLabel(key) : 'Another day';
     resetPrompt();
-    state.days[key] = state.days[key] || [];
-    state.days[key].push({ i: uid(), t: text, d: 0 });
-    input.value = '';
-    save(); render();
-    input.focus();
   }
-  const addForTomorrow = () => addForDay(tomorrow(), narrow.matches ? 'Type a task first' : 'Type a task, then press Add for tomorrow');
-  $('later').addEventListener('click', addForTomorrow);
+  const targetDay = () => addWhen === 'tomorrow' ? tomorrow() : addWhen === 'picked' && pickedKey ? pickedKey : today();
+  for (const c of document.querySelectorAll('.chip[data-when]')) {
+    c.addEventListener('click', () => { setWhen(c.dataset.when); $('new-today').focus(); });
+  }
   $('pick-day-btn').addEventListener('click', () => {
     const picker = $('pick-day');
     picker.min = tomorrow();
     picker.max = dayOf(new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
-    picker.value = tomorrow();
+    picker.value = pickedKey || tomorrow();
     if (typeof picker.showPicker === 'function') { try { picker.showPicker(); return; } catch {} }
     picker.style.pointerEvents = 'auto'; picker.focus(); picker.click();
   });
   $('pick-day').addEventListener('change', e => {
     const key = e.target.value;
-    e.target.value = '';
     if (!key || key <= today()) return;
-    addForDay(key, 'Type a task, then choose a day');
+    setWhen(key === tomorrow() ? 'tomorrow' : 'picked', key);
+    $('new-today').focus();
   });
 
   let aheadOpen = false;
@@ -1664,10 +1666,19 @@
   }
   $('ahead-toggle').addEventListener('click', () => { aheadOpen = !aheadOpen; renderAhead(); });
   wireForm('form-today', 'new-today', text => {
-    const wasDone = dayDone(today());
+    const key = targetDay();
     const id = uid();
-    todayTasks().push({ i: id, t: text, d: 0 });
-    save(); render({ enterId: id }); reactFlame(wasDone);
+    if (key === today()) {
+      const wasDone = dayDone(today());
+      todayTasks().push({ i: id, t: text, d: 0 });
+      save(); render({ enterId: id }); reactFlame(wasDone);
+      return;
+    }
+    state.days[key] = state.days[key] || [];
+    state.days[key].push({ i: id, t: text, d: 0 });
+    aheadOpen = true;
+    setWhen('today');
+    save(); render();
   });
   wireForm('form-fuel', 'new-fuel', text => {
     const id = uid();

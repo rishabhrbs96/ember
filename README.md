@@ -10,8 +10,8 @@ The one extra: a streak. Finish everything on the day's list and the flame at th
 
 ## Views
 
-- **Today** is the default. Unfinished one-off tasks from the day before carry over. Fuel items are added fresh each morning. Type a task and press "Add for tomorrow", or the calendar for any later day; a line under the list shows what is waiting.
-- **Fuel** is the recurring list. Anything here is on every new day's list. It is what you feed the fire.
+- **Today** is the default. Unfinished one-off tasks from the day before carry over. Fuel items are added fresh each morning. Under the box, choose Today, Tomorrow, or Another day, then type and press Enter; a line under the date shows what is waiting.
+- **Fuel** is what you do every day. Add something once and it appears on every new day's list, ready to tick off.
 - **History** is a calendar, one month at a time. Each day's fill shows how it went; tap a day to see exactly what got done.
 - **Settings** holds the theme choice and your data: what is stored, how much space it takes, export or import as JSON (merge or replace), stop saving, or erase everything.
 
