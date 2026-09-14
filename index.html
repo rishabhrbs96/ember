@@ -487,6 +487,7 @@
     cursor: pointer;
   }
   .link:hover { color: var(--ink); }
+  a.link { display: inline-flex; align-items: center; }
 
   /* History: one month at a time, laid out as a calendar. Each day is a button; its state is its fill. */
   .month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
@@ -738,6 +739,14 @@
           <button type="button" class="link" id="data-erase">Erase all data</button>
         </div>
         <p class="note" id="note-data" hidden></p>
+      </div>
+    </section>
+
+    <section class="group-block" aria-labelledby="h-about">
+      <h2 id="h-about">About</h2>
+      <div class="group-body">
+        <p class="lead">Ember is open source, made by Rishabh.</p>
+        <div class="actions"><a class="link" href="https://github.com/rishabhrbs96/ember" target="_blank" rel="noopener">View the code on GitHub</a></div>
       </div>
     </section>
   </section>
