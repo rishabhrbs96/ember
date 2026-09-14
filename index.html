@@ -455,6 +455,9 @@
   .primary { border: 1px solid var(--ink); background: var(--ink); color: var(--paper); }
   .primary.danger { border-color: var(--ember); background: var(--ember); color: var(--paper); }
   .secondary { border: 1px solid var(--line); background: none; color: var(--ink); }
+  /* The first-run choice: both answers on one row, sharing it equally, labels allowed to wrap inside. */
+  #consent form { flex-wrap: nowrap; }
+  #consent form button { flex: 1 1 0; min-width: 0; padding: 0.5rem 0.6rem; white-space: normal; line-height: 1.25; letter-spacing: 0.06em; }
   .secondary:hover { border-color: var(--muted); }
 
   .note { color: var(--muted); margin: 2.5rem 0 0; text-align: center; }
