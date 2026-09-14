@@ -109,7 +109,11 @@ Ember installs as an app through the web app manifest and a service worker. The 
 
 ## History
 
-Three layers, because a person asks three different questions of their past. The five-week grid is one Tab stop; arrow keys walk the days. It answers "how consistent am I", each day an ember: faint when nothing was listed, hollow when nothing got done, ember ring when some did, filled when all of it did. The rows answer "how did a given day go", with a bar and a tally. A page per day answers "what exactly happened", grouped into done and not done, so a long list never has to fold into an accordion. Older days load thirty at a time.
+A calendar, one month at a time, because a month is how people already think about the past. Earlier and Later controls either side of the month name; every day is a numbered cell whose fill is its state: filled ember when everything was done, an ember ring when some was, a muted ring when none was, plain when nothing was listed, faint when the day is still ahead. Today wears an outline. A key under the grid says what the fills mean. Tapping a day opens its page, grouped into done and not done, with a link back to the month. The grid is one Tab stop; arrows walk the days, PageUp and PageDown change month.
+
+## Settings
+
+Titled groups: Theme, Install, Your data. Each title is in the display face, in ink, and each group is separated by a hairline, so the titles cannot be mistaken for the muted body text under them. On wide screens the title sits in a left column beside its group; on phones it sits above.
 
 ## Today
 

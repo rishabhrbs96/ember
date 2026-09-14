@@ -12,7 +12,7 @@ The one extra: a streak. Finish everything on the day's list and the flame at th
 
 - **Today** is the default. Unfinished one-off tasks from the day before carry over. Fuel items are added fresh each morning. Type a task and press "Add for tomorrow", or the calendar for any later day; a line under the list shows what is waiting.
 - **Fuel** is the recurring list. Anything here is on every new day's list. It is what you feed the fire.
-- **History** shows the last five weeks as a grid of embers, a row per day with a progress bar, and a page per day listing what got done and what did not.
+- **History** is a calendar, one month at a time. Each day's fill shows how it went; tap a day to see exactly what got done.
 - **Settings** holds the theme choice and your data: what is stored, how much space it takes, export or import as JSON (merge or replace), stop saving, or erase everything.
 
 The line beside the flame changes with your streak, from "Light it up." to "Nothing puts you out."
@@ -54,7 +54,7 @@ What is stored: your tasks by day, Fuel, the streak, and your theme choice. Days
 - Type and press Enter to add. Escape clears the box.
 - Tab to a task, Enter or Space to finish it. Focus stays on the task; the next stop is its remove button.
 - Escape closes any dialog.
-- In History, Tab reaches the grid once; arrow keys move between days.
+- In History, Tab reaches the calendar once; arrow keys move between days, PageUp and PageDown between months.
 - Dim and Bright switch the theme from the header or Settings. Without a choice, Ember follows your OS.
 
 ## Sizes
