@@ -245,6 +245,8 @@
   }
   .field:not(:placeholder-shown) ~ .later, .later:hover, .later:focus-visible { opacity: 1; }
   .later:hover { color: var(--ink); }
+  .later .short { display: none; }
+  @media (max-width: 400px) { .later .long { display: none; } .later .short { display: inline; } }
   .pick-day {
     position: relative;
     flex: none;
@@ -631,10 +633,10 @@
     <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span></p>
     <form id="form-today" class="field-row" autocomplete="off">
       <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
-      <button type="button" class="later" id="later" title="Put this on tomorrow’s list">Tomorrow</button>
-      <label class="pick-day" title="Put this on a later day">
+      <button type="button" class="later" id="later" title="Add this to tomorrow’s list (Cmd or Ctrl + Enter)"><span class="long">Add for tomorrow</span><span class="short">For tomorrow</span></button>
+      <label class="pick-day" title="Add this to a later day">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
-        <input type="date" id="pick-day" aria-label="Put this on a later day">
+        <input type="date" id="pick-day" aria-label="Add this to a later day">
       </label>
     </form>
     <ul id="list-today" aria-label="Today's tasks"></ul>
@@ -1439,14 +1441,14 @@
     save(); render();
     input.focus();
   }
-  const addForTomorrow = () => addForDay(tomorrow(), 'Type it, then press Tomorrow');
+  const addForTomorrow = () => addForDay(tomorrow(), 'Type it, then press Add for tomorrow');
   $('later').addEventListener('click', addForTomorrow);
   $('pick-day').addEventListener('click', () => { $('pick-day').min = tomorrow(); });
   $('pick-day').addEventListener('change', e => {
     const key = e.target.value;
     e.target.value = '';
     if (!key || key <= today()) return;
-    addForDay(key, 'Type it, then pick a day');
+    addForDay(key, 'Type it, then choose the day');
   });
 
   let aheadOpen = false;

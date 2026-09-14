@@ -96,7 +96,7 @@ Every dialog looks like a dialog: a bordered panel with a shadow over a darkened
 
 ## Later days
 
-The one concession to planning ahead. Beside the input: a Tomorrow link, always visible, and a small calendar that opens the device's own date picker for any other day. Cmd or Ctrl with Enter is Tomorrow on a keyboard. Under today's list, one muted line counts what is waiting; it opens into a plain list with a remove button per task, and closes again. Nothing about later days appears anywhere else.
+The one concession to planning ahead. Beside the input: an "Add for tomorrow" link, always visible, and a small calendar that opens the device's own date picker for any other day. Controls name the action, never just the destination. Cmd or Ctrl with Enter is Tomorrow on a keyboard. Under today's list, one muted line counts what is waiting; it opens into a plain list with a remove button per task, and closes again. Nothing about later days appears anywhere else.
 
 ## Tagline
 
