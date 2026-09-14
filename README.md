@@ -67,4 +67,4 @@ See [DESIGN.md](DESIGN.md) for the direction, palette, and motion rules. The UI 
 
 ## License
 
-MIT for the app. The typefaces Federo and Poiret One are under the SIL Open Font License, see `fonts/LICENSE.txt`.
+MIT for the app. The typefaces Ranade and Satoshi are by the Indian Type Foundry under the Fontshare Free Font License, see `fonts/LICENSE.txt`.

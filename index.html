@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="Ember. Keep the fire within. A todo list that stays in your browser and keeps your streak alive.">
 <title>Ember</title>
-<link rel="preload" href="fonts/federo.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/poiret-one.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ranade-light.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/satoshi-light.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,16 +19,16 @@
 <style>
   /* Type ships with the app. Nothing is fetched from a font service. */
   @font-face {
-    font-family: "Federo";
-    src: url("fonts/federo.woff2") format("woff2");
-    font-weight: 400;
+    font-family: "Ranade";
+    src: url("fonts/ranade-light.woff2") format("woff2");
+    font-weight: 300;
     font-style: normal;
     font-display: swap;
   }
   @font-face {
-    font-family: "Poiret One";
-    src: url("fonts/poiret-one.woff2") format("woff2");
-    font-weight: 400;
+    font-family: "Satoshi";
+    src: url("fonts/satoshi-light.woff2") format("woff2");
+    font-weight: 300;
     font-style: normal;
     font-display: swap;
   }
@@ -40,8 +40,8 @@
     --ember: #bf4a1a;
     --ember-glow: rgba(191, 74, 26, 0.35);
     --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-    --display: "Federo", "Copperplate", "Trajan Pro", Georgia, serif;
-    --body: "Poiret One", "Avenir Next", "Futura", "Century Gothic", -apple-system, sans-serif;
+    --display: "Ranade", "Didot", "Bodoni 72", Georgia, serif;
+    --body: "Satoshi", "Avenir Next", "Helvetica Neue", -apple-system, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -67,7 +67,7 @@
   html { scrollbar-gutter: stable; }
   html, body { margin: 0; background: var(--paper); color: var(--ink); }
   body {
-    font: 1.125rem/1.45 var(--body);
+    font: 300 1.125rem/1.45 var(--body);
     letter-spacing: 0.01em;
     -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
@@ -85,7 +85,7 @@
   header { margin-bottom: 1.5rem; }
   .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
   .brand { display: flex; align-items: baseline; gap: 0.9rem; }
-  .wordmark { margin: 0; font: 400 1rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.22em; }
+  .wordmark { margin: 0; font: 300 1rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.22em; }
   .tagline { margin: 0; font-family: var(--body); font-size: 0.8125rem; letter-spacing: 0.08em; color: var(--muted); white-space: nowrap; }
   @media (max-width: 400px) { .tagline { display: none; } }
   .hearth {
@@ -111,7 +111,7 @@
   .hearth-text { min-width: 0; }
   .slogan {
     margin: 0 0 0.25rem;
-    font: 400 1.6rem/1.15 var(--display);
+    font: 300 1.6rem/1.15 var(--display);
     letter-spacing: 0.03em;
   }
   .slogan.swap { animation: fadeIn 0.4s var(--ease); }
@@ -149,7 +149,7 @@
     100% { transform: scale(1); }
   }
   .count {
-    font: 400 1.6rem/1 var(--display);
+    font: 300 1.6rem/1 var(--display);
     font-variant-numeric: tabular-nums;
   }
   .count.bump { animation: bump 0.5s var(--ease); }
@@ -388,7 +388,7 @@
   .group-block:first-child { padding-top: 0; border-top: 0; }
   #view-settings h2 {
     margin: 0 0 1rem;
-    font: 400 1.2rem/1.2 var(--display);
+    font: 300 1.2rem/1.2 var(--display);
     letter-spacing: 0.04em;
     color: var(--ink);
   }
@@ -443,7 +443,7 @@
   dialog[open] { animation: dialogIn 0.22s var(--ease); }
   @keyframes dialogIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
   .dialog-body { padding: 1.5rem 1.5rem 0.5rem; }
-  dialog h2 { font: 400 1.35rem/1.2 var(--display); letter-spacing: 0.02em; margin: 0 0 0.75rem; }
+  dialog h2 { font: 300 1.35rem/1.2 var(--display); letter-spacing: 0.02em; margin: 0 0 0.75rem; }
   dialog p { margin: 0 0 0.75rem; color: var(--muted); }
   dialog form {
     display: flex;
@@ -487,7 +487,7 @@
 
   /* History: one month at a time, laid out as a calendar. Each day is a button; its state is its fill. */
   .month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-  .month-title { margin: 0; font: 400 1.35rem/1.2 var(--display); letter-spacing: 0.04em; }
+  .month-title { margin: 0; font: 300 1.35rem/1.2 var(--display); letter-spacing: 0.04em; }
   .month-btn {
     width: 44px; height: 44px;
     display: grid; place-items: center;
@@ -549,7 +549,7 @@
   .tally { flex: none; color: var(--muted); font-size: 1rem; font-variant-numeric: tabular-nums; }
 
   .back { padding: 0; margin-bottom: 0.75rem; }
-  .day-title { font: 400 1.35rem/1.2 var(--display); letter-spacing: 0.03em; margin: 0 0 0.25rem; }
+  .day-title { font: 300 1.35rem/1.2 var(--display); letter-spacing: 0.03em; margin: 0 0 0.25rem; }
   .group { font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin: 1.25rem 0 0.25rem; }
   .day-tasks li { border-bottom: 1px solid var(--line); }
   .day-tasks .plain { padding: 0.55rem 0; }
