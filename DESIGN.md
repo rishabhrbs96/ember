@@ -94,9 +94,17 @@ A first-run dialog explains that everything stays in the browser and asks before
 
 Every dialog looks like a dialog: a bordered panel with a shadow over a darkened, blurred page, a title phrased as the question, one paragraph, then the actions on their own row with the cancel on the left and the primary on the right. The browser's own confirm() is never used. A destructive primary is ember; every other primary is ink.
 
-## Tomorrow
+## Later days
 
-The one concession to planning ahead. A Tomorrow link appears beside the input once there is text, and Cmd or Ctrl with Enter does the same. Nothing else about tomorrow is shown except a single muted count under today's list.
+The one concession to planning ahead. Beside the input: a Tomorrow link, always visible, and a small calendar that opens the device's own date picker for any other day. Cmd or Ctrl with Enter is Tomorrow on a keyboard. Under today's list, one muted line counts what is waiting; it opens into a plain list with a remove button per task, and closes again. Nothing about later days appears anywhere else.
+
+## Tagline
+
+"Keep the fire within." It sits beside the wordmark in the body face, hidden on phones narrower than 400px where the row has no room, and repeats in the manifest and README. It is about the person, not the app: the fire is theirs, the app only helps keep it.
+
+## Import
+
+Settings offers Import from JSON next to Export. The file is checked field by field: dates must be real dates, tasks must have text, anything malformed is dropped and the count is shown. Then a three-way dialog: Cancel, Merge, Replace. Merge unions days and tasks by text, Fuel by text, and keeps the higher best streak. Replace keeps only the consent and theme. Replace is the ember button because it discards data.
 
 ## Install
 
