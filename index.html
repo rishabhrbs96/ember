@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c9501c' d='M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z'/%3E%3Cpath fill='%23faf7f2' opacity='.85' d='M12 11.5c.5 2 2.4 3 2.4 5.1a2.4 2.4 0 0 1-4.8 0c0-1.4 1-2.3 1.3-2.9.1.9.4 1.3.9 1.4.2-1.2-.1-2.4.2-3.6z'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23bf4a1a' d='M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z'/%3E%3Cpath fill='%23faf7f2' opacity='.85' d='M12 11.5c.5 2 2.4 3 2.4 5.1a2.4 2.4 0 0 1-4.8 0c0-1.4 1-2.3 1.3-2.9.1.9.4 1.3.9 1.4.2-1.2-.1-2.4.2-3.6z'/%3E%3C/svg%3E">
 <style>
   /* Type ships with the app. Nothing is fetched from a font service. */
   @font-face {
@@ -36,8 +36,8 @@
     --ink: #1d1a17;
     --muted: #6e665e;
     --line: #e6e0d8;
-    --ember: #c9501c;
-    --ember-glow: rgba(201, 80, 28, 0.35);
+    --ember: #bf4a1a;
+    --ember-glow: rgba(191, 74, 26, 0.35);
     --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     --display: "Federo", "Copperplate", "Trajan Pro", Georgia, serif;
     --body: "Poiret One", "Avenir Next", "Futura", "Century Gothic", -apple-system, sans-serif;
@@ -240,10 +240,8 @@
     text-decoration: underline;
     text-underline-offset: 3px;
     cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s var(--ease), color 0.15s var(--ease);
+    transition: color 0.15s var(--ease);
   }
-  .field:not(:placeholder-shown) ~ .later, .later:hover, .later:focus-visible { opacity: 1; }
   .later:hover { color: var(--ink); }
   .later .short { display: none; }
   @media (max-width: 400px) { .later .long { display: none; } .later .short { display: inline; } }
@@ -255,11 +253,10 @@
     display: grid;
     place-items: center;
     color: var(--muted);
-    opacity: 0.6;
     cursor: pointer;
-    transition: opacity 0.2s var(--ease), color 0.15s var(--ease);
+    transition: color 0.15s var(--ease);
   }
-  .pick-day:hover, .pick-day:focus-within { opacity: 1; color: var(--ink); }
+  .pick-day:hover, .pick-day:focus-within { color: var(--ink); }
   .pick-day svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
   .pick-day input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
   .pick-day:focus-within { outline: 2px solid var(--ember); outline-offset: 2px; border-radius: 3px; }
@@ -454,15 +451,6 @@
   .date-line { margin: 0 0 0.75rem; font-family: var(--display); font-size: 1.0625rem; letter-spacing: 0.03em; }
   .date-hint { color: var(--muted); font-family: var(--body); font-size: 1rem; letter-spacing: 0.01em; }
 
-  .foot {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 44px;
-    margin-top: 0.75rem;
-    font-size: 0.9375rem;
-    color: var(--muted);
-  }
   .link {
     min-height: 44px;
     padding: 0 0.25rem;
@@ -641,10 +629,6 @@
     </form>
     <ul id="list-today" aria-label="Today's tasks"></ul>
     <p class="note" id="note-today" hidden></p>
-    <div class="foot" id="foot-today" hidden>
-      <span id="left-today"></span>
-      <button type="button" class="link" id="clear-today">Clear done</button>
-    </div>
     <button type="button" class="link ahead-toggle" id="ahead-toggle" hidden aria-expanded="false" aria-controls="list-ahead"></button>
     <ul id="list-ahead" class="ahead" hidden aria-label="Tasks for later days"></ul>
   </section>
@@ -823,7 +807,10 @@
     return changed;
   }
   const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return dayOf(d); };
-  const todayTasks = () => state.days[today()];
+  const todayTasks = () => {
+    if (!state.days[today()] && ensureToday()) save();
+    return state.days[today()];
+  };
 
   // A day is done when every task on its list is finished and the list was not empty.
   // The streak is the run of done days ending today, or yesterday if today is not done yet.
@@ -895,7 +882,7 @@
     } else if (todayDone) {
       line = `-day streak. Today is done.`;
     } else {
-      line = `-day streak. ${left === 1 ? 'One task' : left + ' tasks'} left to keep it.`;
+      line = `-day streak. Finish today to keep it.`;
     }
     $('streak').textContent = line;
     $('streak').setAttribute('aria-label', alive ? `${n}${line}` : line);
@@ -969,11 +956,20 @@
     rm.className = 'remove';
     rm.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
     rm.setAttribute('aria-label', 'Remove from today: ' + t.t);
-    rm.addEventListener('click', () => leaveRow(li, () => {
-      const wasDone = dayDone(today());
-      state.days[today()] = todayTasks().filter(x => x.i !== t.i);
-      streak(); save(); render(); reactFlame(wasDone);
-    }));
+    rm.addEventListener('click', () => {
+      const hadFocus = li.contains(document.activeElement);
+      const rows = [...li.parentNode.children];
+      const neighbour = rows[rows.indexOf(li) + 1] || rows[rows.indexOf(li) - 1];
+      const nextId = neighbour && neighbour.dataset.id;
+      leaveRow(li, () => {
+        const wasDone = dayDone(today());
+        state.days[today()] = todayTasks().filter(x => x.i !== t.i);
+        streak(); save(); render(); reactFlame(wasDone);
+        if (!hadFocus) return;
+        const next = nextId && $('list-today').querySelector(`[data-id="${nextId}"] .toggle`);
+        (next || $('new-today')).focus();
+      });
+    });
 
     li.append(toggle, rm);
     return li;
@@ -1018,22 +1014,15 @@
     } else if (!state.consent) {
       note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Settings.';
       note.className = 'note error'; note.hidden = false;
-    } else if (tasks.length === 0) {
-      note.textContent = 'Your day is clear. Add the first thing above.';
-      note.className = 'note'; note.hidden = false;
     } else note.hidden = true;
 
-    $('foot-today').hidden = tasks.length === 0;
-    $('left-today').textContent = open.length === 0 ? 'All done for today' : `${open.length} left`;
 
     const { n, todayDone } = streak();
     renderAhead();
     $('date-today').textContent = longDate(today());
     $('date-hint').textContent = tasks.length === 0 ? 'A clean page.'
-      : todayDone ? (n > 1 ? `Day ${n} of your streak. Done.` : 'Done.')
-      : n > 0 ? `Day ${n + 1} of your streak.`
-      : 'Day one.';
-    $('clear-today').hidden = done.length === 0;
+      : todayDone ? 'All done.'
+      : `${open.length} left.`;
   }
 
   function fuelRow(k) {
@@ -1394,12 +1383,16 @@
     streak();
     save();
     const li = $('list-today').querySelector(`[data-id="${id}"]`);
+    const hadFocus = !!li && li.contains(document.activeElement);
     if (li) {
       li.classList.toggle('done', !!t.d);
       if (t.d && !reduceMotion) sparks(li.querySelector('.mark'));
     }
-    // Let the mark fill before the row glides down.
-    setTimeout(() => { render(); reactFlame(wasDone); }, reduceMotion ? 0 : 180);
+    // Let the mark fill before the row glides down. Keyboard focus follows the row.
+    setTimeout(() => {
+      render(); reactFlame(wasDone);
+      if (hadFocus) { const again = $('list-today').querySelector(`[data-id="${id}"] .toggle`); if (again) again.focus(); }
+    }, reduceMotion ? 0 : 180);
   }
 
   function sparks(mark) {
@@ -1510,11 +1503,6 @@
     ensureToday();
     save(); render({ enterId: id }); reactFlame(wasDone);
   });
-  $('clear-today').addEventListener('click', () => {
-    state.days[today()] = todayTasks().filter(t => !t.d);
-    save(); render();
-    $('new-today').focus();
-  });
 
   // Midnight can pass while the tab sits open: roll the day and let the ember go out.
   document.addEventListener('visibilitychange', () => {
@@ -1523,6 +1511,12 @@
     render();
   });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  function atMidnight() {
+    const now = new Date();
+    const next = new Date(now); next.setHours(24, 0, 2, 0);
+    setTimeout(() => { if (ensureToday()) save(); render(); atMidnight(); }, next - now);
+  }
+  atMidnight();
 
   if (ensureToday()) save();
   applyTheme();
