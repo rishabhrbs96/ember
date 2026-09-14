@@ -382,8 +382,22 @@
   .field:focus-visible { outline: none; border-radius: 0; }
 
   /* Settings and the first-run notice. The dialog is the one raised surface. */
-  #view-settings h2 { font-size: 0.8125rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.14em; margin: 2rem 0 0.75rem; }
-  #view-settings h2:first-child { margin-top: 0; }
+  /* Settings: each group is a titled block. The title is in the display face, in ink,
+     above a hairline; the body is muted text and links, indented on wide screens. */
+  .group-block { padding: 1.5rem 0 1.75rem; border-top: 1px solid var(--line); }
+  .group-block:first-child { padding-top: 0; border-top: 0; }
+  #view-settings h2 {
+    margin: 0 0 1rem;
+    font: 400 1.2rem/1.2 var(--display);
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .group-body .lead { margin-bottom: 1rem; }
+  .group-body .actions { margin-top: 0.25rem; }
+  @media (min-width: 700px) {
+    .group-block { display: grid; grid-template-columns: 9rem 1fr; gap: 0 1.5rem; }
+    #view-settings h2 { margin: 0; padding-top: 0.15rem; }
+  }
   .choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .choice {
     min-height: 44px;
@@ -400,7 +414,7 @@
   }
   .choice:hover { color: var(--ink); }
   .choice[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
-  .facts { margin: 0 0 1.5rem; }
+  .facts { margin: 0 0 1rem; }
   .facts div {
     display: flex;
     justify-content: space-between;
@@ -677,32 +691,44 @@
   </section>
 
   <section id="view-settings" aria-label="Settings" hidden>
-    <h2>Theme</h2>
-    <div class="choices" role="group" aria-label="Theme">
-      <button type="button" class="choice" data-theme-choice="system">Follow system</button>
-      <button type="button" class="choice" data-theme-choice="light">Bright</button>
-      <button type="button" class="choice" data-theme-choice="dark">Dim</button>
-    </div>
+    <section class="group-block" aria-labelledby="h-theme">
+      <h2 id="h-theme">Theme</h2>
+      <div class="group-body">
+        <div class="choices" role="group" aria-label="Theme">
+          <button type="button" class="choice" data-theme-choice="system">Follow system</button>
+          <button type="button" class="choice" data-theme-choice="light">Bright</button>
+          <button type="button" class="choice" data-theme-choice="dark">Dim</button>
+        </div>
+      </div>
+    </section>
 
-    <h2>Install</h2>
-    <p class="lead" id="install-text"></p>
-    <div class="actions"><button type="button" class="link" id="install-btn" hidden>Install Ember</button></div>
+    <section class="group-block" aria-labelledby="h-install">
+      <h2 id="h-install">Install</h2>
+      <div class="group-body">
+        <p class="lead" id="install-text"></p>
+        <div class="actions"><button type="button" class="link" id="install-btn" hidden>Install Ember</button></div>
+      </div>
+    </section>
 
-    <h2>Your data</h2>
-    <p class="lead">Everything Ember knows lives in this browser and nowhere else. Days older than two years are dropped.</p>
-    <dl class="facts">
-      <div><dt>Saving to this device</dt><dd id="data-consent"></dd></div>
-      <div><dt>Space used</dt><dd id="data-size"></dd></div>
-      <div><dt>Days recorded</dt><dd id="data-days"></dd></div>
-    </dl>
-    <div class="actions">
-      <button type="button" class="link" id="data-toggle"></button>
-      <button type="button" class="link" id="data-export">Export as JSON</button>
-      <button type="button" class="link" id="data-import">Import from JSON</button>
-      <input type="file" id="import-file" accept="application/json,.json" hidden>
-      <button type="button" class="link" id="data-erase">Erase everything</button>
-    </div>
-    <p class="note" id="note-data" hidden></p>
+    <section class="group-block" aria-labelledby="h-data">
+      <h2 id="h-data">Your data</h2>
+      <div class="group-body">
+        <p class="lead">Everything Ember knows lives in this browser and nowhere else. Days older than two years are dropped.</p>
+        <dl class="facts">
+          <div><dt>Saving to this device</dt><dd id="data-consent"></dd></div>
+          <div><dt>Space used</dt><dd id="data-size"></dd></div>
+          <div><dt>Days recorded</dt><dd id="data-days"></dd></div>
+        </dl>
+        <div class="actions">
+          <button type="button" class="link" id="data-toggle"></button>
+          <button type="button" class="link" id="data-export">Export as JSON</button>
+          <button type="button" class="link" id="data-import">Import from JSON</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden>
+          <button type="button" class="link" id="data-erase">Erase everything</button>
+        </div>
+        <p class="note" id="note-data" hidden></p>
+      </div>
+    </section>
   </section>
 </main>
 
