@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Ember. Keep the fire within. A todo list that stays in your browser and keeps your streak alive.">
+<meta name="description" content="Ember. Keep the fire within. A to-do list that stays in your browser, with a streak to keep.">
 <title>Ember</title>
 <link rel="preload" href="fonts/ranade-light.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/satoshi-light.woff2" as="font" type="font/woff2" crossorigin>
@@ -657,7 +657,7 @@
 
   <section id="view-fuel" aria-label="Fuel" hidden>
     <form id="form-fuel" autocomplete="off">
-      <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New fuel item" maxlength="200">
+      <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New Fuel item" maxlength="200">
     </form>
     <ul id="list-fuel" aria-label="Fuel items"></ul>
   </section>
@@ -665,11 +665,11 @@
   <section id="view-history" aria-label="History" hidden>
     <div id="history-all">
       <div class="month-nav">
-        <button type="button" class="month-btn" id="month-prev" aria-label="Earlier month">
+        <button type="button" class="month-btn" id="month-prev" aria-label="Previous month">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
         </button>
         <h2 class="month-title" id="month-title" aria-live="polite"></h2>
-        <button type="button" class="month-btn" id="month-next" aria-label="Later month">
+        <button type="button" class="month-btn" id="month-next" aria-label="Next month">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
@@ -684,9 +684,9 @@
       <h2 class="day-title" id="day-title"></h2>
       <p class="lead" id="day-tally"></p>
       <h3 class="group" id="day-done-h"></h3>
-      <ul class="day-tasks" id="day-done"></ul>
+      <ul class="day-tasks" id="day-done" aria-labelledby="day-done-h"></ul>
       <h3 class="group" id="day-open-h"></h3>
-      <ul class="day-tasks" id="day-open"></ul>
+      <ul class="day-tasks" id="day-open" aria-labelledby="day-open-h"></ul>
     </div>
   </section>
 
@@ -735,12 +735,12 @@
 <dialog id="consent" aria-labelledby="consent-title">
   <div class="dialog-body">
     <h2 id="consent-title">Keep your list on this device?</h2>
-    <p>Ember saves your tasks, streak, and theme in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
+    <p>Ember keeps your tasks, streak, and theme in this browser. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
     <p>You can export or erase all of it any time under Settings.</p>
   </div>
   <form method="dialog">
     <button type="submit" value="no" class="secondary">Not now</button>
-    <button type="submit" value="yes" class="primary">Yes, keep it here</button>
+    <button type="submit" value="yes" class="primary">Keep it here</button>
   </form>
 </dialog>
 
@@ -885,7 +885,7 @@
     $('theme-color').content = getComputedStyle(root).getPropertyValue('--paper').trim();
     const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
     $('theme').textContent = next === 'dark' ? 'Dim' : 'Bright';
-    $('theme').setAttribute('aria-label', `Switch to ${next} theme`);
+    $('theme').setAttribute('aria-label', next === 'dark' ? 'Dim the theme' : 'Brighten the theme');
     for (const b of document.querySelectorAll('[data-theme-choice]')) {
       b.setAttribute('aria-pressed', String(b.dataset.themeChoice === state.theme));
     }
@@ -922,17 +922,17 @@
     let line;
     if (!alive) {
       line = state.streak.best > 1
-        ? `No streak right now. Your best is ${state.streak.best} days.`
+        ? `No streak right now. Your best is ${state.streak.best} day${state.streak.best === 1 ? '' : 's'}.`
         : 'No streak yet. Finish today’s list to start one.';
     } else if (todayDone) {
       line = `-day streak.`;
     } else {
-      line = `-day streak. Finish today to keep it.`;
+      line = `-day streak. Finish today’s list to keep it.`;
     }
     $('streak').textContent = line;
 
     const slogan = !alive ? (state.streak.best > 1 ? 'Light it again.' : 'Light it up.')
-      : !todayDone ? (n < 3 ? 'Keep it going.' : 'Don’t let it go out.')
+      : !todayDone ? (n < 3 ? 'Still warm.' : 'Don’t let it go out.')
       : n < 3 ? 'First light.'
       : n < 7 ? 'Keep it burning.'
       : n < 30 ? 'You are on fire.'
@@ -986,7 +986,7 @@
     toggle.type = 'button';
     toggle.className = 'toggle';
     toggle.setAttribute('aria-pressed', String(!!t.d));
-    toggle.setAttribute('aria-label', t.t + (t.k ? ' (fuel)' : ''));
+    toggle.setAttribute('aria-label', t.t + (t.k ? ' (from Fuel)' : ''));
     const mark = document.createElement('span');
     mark.className = 'mark';
     const text = document.createElement('span');
@@ -1056,10 +1056,10 @@
 
     const note = $('note-today');
     if (storageBroken) {
-      note.textContent = 'Your browser is blocking storage, so this list will vanish when you close the tab. Private window?';
+      note.textContent = 'Your browser is blocking storage. This list lasts until you close the tab. If this is a private window, try a normal one.';
       note.className = 'note error'; note.hidden = false;
     } else if (!state.consent && !$('consent').open) {
-      note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Settings.';
+      note.textContent = 'Not saving to this device. This list lasts until you close the tab. To keep it, press Start saving under Settings.';
       note.className = 'note error'; note.hidden = false;
     } else note.hidden = true;
 
@@ -1084,7 +1084,7 @@
     rm.type = 'button';
     rm.className = 'remove';
     rm.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
-    rm.setAttribute('aria-label', 'Remove from fuel: ' + k.text);
+    rm.setAttribute('aria-label', 'Remove from Fuel: ' + k.text);
     rm.addEventListener('click', () => leaveRow(li, () => {
       state.fuel = state.fuel.filter(x => x.id !== k.id);
       // Drop today's copy too, unless it is already finished.
@@ -1166,7 +1166,7 @@
       cell.style.setProperty('--i', d);
       cell.textContent = String(d);
       const t = tasks && tasks.length ? tally(tasks) : null;
-      cell.setAttribute('aria-label', `${dayLabel(key)}: ${t ? t.text + ' done' : future ? 'ahead' : 'nothing listed'}`);
+      cell.setAttribute('aria-label', `${dayLabel(key)}: ${t ? t.text + ' done' : future ? 'still to come' : 'nothing listed'}`);
       cell.disabled = !t;
       if (t) cell.addEventListener('click', () => { historyDay = key; scrollTo(0, 0); renderHistory(); });
       cell.tabIndex = -1;
@@ -1177,11 +1177,11 @@
 
     const monthLead = $('month-lead');
     monthLead.hidden = listed === 0;
-    monthLead.textContent = `${litDays} of ${listed} listed day${listed === 1 ? '' : 's'} fully done.`;
+    monthLead.textContent = `All done on ${litDays} of ${listed} listed day${listed === 1 ? '' : 's'}.`;
     const anyEver = Object.keys(state.days).some(k => k < today() && state.days[k].length);
     const note = $('note-history');
     note.hidden = anyEver;
-    note.textContent = 'Nothing here yet. Tomorrow, today will be.';
+    note.textContent = 'No past days yet. Today becomes one tomorrow.';
   }
   $('month-prev').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, -1); renderHistory(); });
   $('month-next').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, 1); renderHistory(); });
@@ -1190,7 +1190,7 @@
     const tasks = state.days[key] || [];
     const t = tally(tasks);
     $('day-title').textContent = longDate(key);
-    $('day-tally').textContent = t.done === t.total ? `All ${t.total} done.` : `${t.text} done.`;
+    $('day-tally').textContent = t.done === t.total ? (t.total === 1 ? 'All done.' : `All ${t.total} done.`) : `${t.text} done.`;
     const fill = (id, hid, items, label) => {
       const ul = $(id);
       ul.textContent = '';
@@ -1209,7 +1209,7 @@
         text.textContent = x.t;
         p.append(mark, text);
         if (x.k) p.append(flameIcon('fuel-mark'));
-        p.setAttribute('aria-label', (x.d ? 'Done: ' : 'Not done: ') + x.t);
+        p.setAttribute('aria-label', x.t);
         li.append(p);
         ul.append(li);
       }
@@ -1256,9 +1256,9 @@
     btn.hidden = true;
     if (standalone) text.textContent = 'Installed. Ember opens from your home screen and works offline.';
     else if (installPrompt) { text.textContent = 'Put Ember on your home screen. It opens like an app and works offline.'; btn.hidden = false; }
-    else if (ios) text.textContent = 'In Safari, tap Share, then “Add to Home Screen”. Ember then opens like an app and works offline.';
-    else if (location.protocol === 'file:') text.textContent = 'Installing needs Ember served over https, not opened as a file.';
-    else text.textContent = 'In your browser’s menu, choose “Install app” or “Add to Home Screen”. Ember then opens like an app and works offline.';
+    else if (ios) text.textContent = 'In Safari, tap Share, then “Add to Home Screen”. Ember opens like an app and works offline.';
+    else if (location.protocol === 'file:') text.textContent = 'Installing needs Ember served over HTTPS, not opened as a file.';
+    else text.textContent = 'In your browser’s menu, choose “Install app” or “Add to Home Screen”. Ember opens like an app and works offline.';
   }
   $('install-btn').addEventListener('click', async () => {
     if (!installPrompt) return;
@@ -1286,14 +1286,14 @@
   }
   $('data-toggle').addEventListener('click', async () => {
     if (state.consent) {
-      if (!await ask('Stop saving to this device?', 'The saved copy is removed from this browser. This session’s list stays until you close the tab.', 'Stop saving')) return;
+      if (!await ask('Stop saving to this device?', 'The saved copy will be removed from this browser. This list lasts until you close the tab.', 'Stop saving')) return;
       state.consent = null;
       try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); } catch {}
-      renderData('Stopped. The saved copy was removed from this browser. This session’s list lasts until you close the tab.');
+      renderData('Stopped. This list lasts until you close the tab.');
     } else {
       state.consent = today();
       save();
-      renderData(storageBroken ? 'Your browser is blocking storage, so nothing could be saved.' : 'Saving to this device.');
+      renderData(storageBroken ? 'Your browser is blocking storage, so nothing was saved. If this is a private window, try a normal one.' : 'Started.');
     }
   });
   /* Import. The file is checked field by field; anything malformed is dropped and counted. */
@@ -1305,7 +1305,7 @@
     if (Array.isArray(obj.tasks) && !obj.days) {
       obj = { days: { [today()]: obj.tasks.map(t => ({ i: t.id, t: t.text, d: t.done ? 1 : 0 })) }, fuel: [], streak: { best: obj.streak && obj.streak.best } };
     }
-    if (!obj.days || typeof obj.days !== 'object' || Array.isArray(obj.days)) return { error: 'That file is not an Ember export. No days in it.' };
+    if (!obj.days || typeof obj.days !== 'object' || Array.isArray(obj.days)) return { error: 'That file is not an Ember export: it has no days.' };
     const out = fresh();
     let dropped = 0;
     const dayRe = /^\d{4}-\d{2}-\d{2}$/;
@@ -1331,7 +1331,7 @@
     const best = obj.streak && Number(obj.streak.best);
     out.streak.best = Number.isFinite(best) && best > 0 ? Math.floor(best) : 0;
     const dayCount = Object.keys(out.days).length;
-    if (!dayCount && !out.fuel.length) return { error: 'That file has no tasks or Fuel in it.' };
+    if (!dayCount && !out.fuel.length) return { error: 'That file holds no tasks or Fuel.' };
     return { data: out, dayCount, fuelCount: out.fuel.length, dropped };
   }
   function mergeInto(cur, inc) {
@@ -1358,8 +1358,9 @@
     if (result.error) { renderData(result.error); return; }
     const { data, dayCount, fuelCount, dropped } = result;
     const parts = [`${dayCount} day${dayCount === 1 ? '' : 's'} with tasks`, `${fuelCount} Fuel item${fuelCount === 1 ? '' : 's'}`];
-    if (data.streak.best) parts.push(`a best streak of ${data.streak.best}`);
-    $('import-text').textContent = `The file holds ${parts.join(', ')}.` + (dropped ? ` ${dropped} malformed entr${dropped === 1 ? 'y was' : 'ies were'} skipped.` : '');
+    if (data.streak.best) parts.push(`a best streak of ${data.streak.best} day${data.streak.best === 1 ? '' : 's'}`);
+    const list = parts.length > 1 ? parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1] : parts[0];
+    $('import-text').textContent = `The file holds ${list}.` + (dropped ? ` ${dropped} unreadable entr${dropped === 1 ? 'y was' : 'ies were'} skipped.` : '');
     const dlg = $('import-dialog');
     const choice = await new Promise(resolve => { dlg.addEventListener('close', () => resolve(dlg.returnValue), { once: true }); dlg.showModal(); });
     if (choice === 'replace') {
@@ -1372,7 +1373,8 @@
     save();
     applyTheme();
     render();
-    renderData(choice === 'replace' ? `Replaced with the file: ${dayCount} days, ${fuelCount} Fuel items.` : `Merged the file in: ${dayCount} days, ${fuelCount} Fuel items.`);
+    const counts = `${dayCount} day${dayCount === 1 ? '' : 's'} and ${fuelCount} Fuel item${fuelCount === 1 ? '' : 's'} from the file.`;
+    renderData((choice === 'replace' ? 'Replaced. ' : 'Merged. ') + counts);
   });
 
   $('data-export').addEventListener('click', () => {
@@ -1384,7 +1386,7 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    renderData('Exported. The file holds every task, day, and the streak, as JSON.');
+    renderData('Exported. The file holds every day, every Fuel item, and the streak.');
   });
   $('data-erase').addEventListener('click', async () => {
     if (!await ask('Erase everything?', 'Every task, Fuel item, past day, and the streak will be removed from this browser. This cannot be undone.', 'Erase everything')) return;
@@ -1503,7 +1505,7 @@
     save(); render();
     input.focus();
   }
-  const addForTomorrow = () => addForDay(tomorrow(), narrow.matches ? 'Type it, then press For tomorrow' : 'Type it, then press Add for tomorrow');
+  const addForTomorrow = () => addForDay(tomorrow(), narrow.matches ? 'Type a task first' : 'Type a task, then press Add for tomorrow');
   $('later').addEventListener('click', addForTomorrow);
   $('pick-day-btn').addEventListener('click', () => {
     const picker = $('pick-day');
@@ -1517,7 +1519,7 @@
     const key = e.target.value;
     e.target.value = '';
     if (!key || key <= today()) return;
-    addForDay(key, 'Type it, then choose the day');
+    addForDay(key, 'Type a task, then choose a day');
   });
 
   let aheadOpen = false;
@@ -1548,7 +1550,7 @@
       rm.type = 'button';
       rm.className = 'remove';
       rm.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
-      rm.setAttribute('aria-label', `Remove from ${dayLabel(key)}: ${t.t}`);
+      rm.setAttribute('aria-label', `Remove from ${key === tomorrow() ? 'tomorrow' : dayLabel(key)}: ${t.t}`);
       rm.addEventListener('click', () => leaveRow(li, () => {
         state.days[key] = state.days[key].filter(x => x.i !== t.i);
         if (!state.days[key].length) delete state.days[key];

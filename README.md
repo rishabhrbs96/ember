@@ -2,7 +2,7 @@
 
 *Keep the fire within.*
 
-A todo list that is only as complicated as a list needs to be.
+A to-do list that is only as complicated as a list needs to be.
 
 One box to type in. One tap to finish. Everything stays in your browser's local storage. No account, no server, no sync.
 
