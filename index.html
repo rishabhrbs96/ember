@@ -82,8 +82,9 @@
   /* Header: a small title row, then the hearth. The flame is the one focal point. */
   header { margin-bottom: 1.5rem; }
   .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
-  .wordmark { margin: 0; display: flex; align-items: baseline; gap: 0.9rem; font: 400 1rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.22em; }
-  .tagline { font-family: var(--body); font-size: 0.8125rem; letter-spacing: 0.08em; color: var(--muted); text-transform: none; white-space: nowrap; }
+  .brand { display: flex; align-items: baseline; gap: 0.9rem; }
+  .wordmark { margin: 0; font: 400 1rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.22em; }
+  .tagline { margin: 0; font-family: var(--body); font-size: 0.8125rem; letter-spacing: 0.08em; color: var(--muted); white-space: nowrap; }
   @media (max-width: 400px) { .tagline { display: none; } }
   .hearth {
     display: flex;
@@ -256,13 +257,14 @@
     cursor: pointer;
     transition: color 0.15s var(--ease);
   }
-  .pick-day:hover, .pick-day:focus-within { color: var(--ink); }
+  .pick-day button { width: 44px; min-height: 44px; display: grid; place-items: center; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
+  .pick-day button:hover { color: var(--ink); }
   .pick-day svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
-  .pick-day input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-  .pick-day:focus-within { outline: 2px solid var(--ember); outline-offset: 2px; border-radius: 3px; }
-  .ahead-toggle { display: block; margin-top: 1.5rem; padding: 0; color: var(--muted); font-size: 0.9375rem; }
+  .pick-day input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+  .ahead-toggle { display: block; margin: 0.25rem 0 0.5rem; padding: 0; color: var(--muted); font-size: 0.9375rem; }
+  .ahead { margin-bottom: 1rem; }
   .ahead li { border-bottom: 1px solid var(--line); }
-  .ahead .plain { min-height: 44px; padding: 0.4rem 0; gap: 0.7rem; }
+  .ahead .plain { padding: 0.55rem 0; gap: 0.7rem; }
   .ahead .when { flex: none; min-width: 6.5rem; color: var(--muted); font-size: 0.9375rem; }
   .field:focus-visible { background-size: 100% 2px; }
 
@@ -284,10 +286,9 @@
   .toggle, .plain {
     flex: 1;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.9rem;
-    min-height: 56px;
-    padding: 0.6rem 0;
+    padding: 0.95rem 0;
     border: 0;
     background: none;
     text-align: left;
@@ -298,6 +299,7 @@
   .mark {
     width: 20px; height: 20px;
     flex: none;
+    margin-top: 0.2em;
     border-radius: 50%;
     border: 1.5px solid var(--muted);
     position: relative;
@@ -316,18 +318,7 @@
   li.done .toggle { color: var(--muted); }
   li.done .mark { background: var(--ember); border-color: var(--ember); }
   li.done .mark::after { transform: rotate(45deg) scale(1); }
-  .text { position: relative; }
-  .text::after {
-    content: "";
-    position: absolute;
-    left: 0; right: 0; top: 55%;
-    height: 1.5px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.25s var(--ease);
-  }
-  li.done .text::after { transform: scaleX(1); }
+  li.done .text { text-decoration: line-through; text-decoration-thickness: 1.5px; }
   /* Sparks fly off the mark when a task is finished. Transform and opacity only. */
   .sp {
     position: absolute;
@@ -523,16 +514,14 @@
     cursor: pointer;
   }
   .dayrow:hover .when { color: var(--ember); }
-  .dayrow .when { flex: none; min-width: 6.5rem; transition: color 0.15s var(--ease); }
-  .bar { flex: 1; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
-  .bar i { display: block; height: 100%; width: calc(var(--r, 0) * 100%); background: var(--ember); }
+  .dayrow .when { flex: 1; transition: color 0.15s var(--ease); }
   .tally { flex: none; color: var(--muted); font-size: 1rem; font-variant-numeric: tabular-nums; }
 
   .back { padding: 0; margin-bottom: 0.75rem; }
   .day-title { font: 400 1.35rem/1.2 var(--display); letter-spacing: 0.03em; margin: 0 0 0.25rem; }
   .group { font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin: 1.25rem 0 0.25rem; }
   .day-tasks li { border-bottom: 1px solid var(--line); }
-  .day-tasks .plain { min-height: 44px; padding: 0.4rem 0; }
+  .day-tasks .plain { padding: 0.55rem 0; }
   .day-tasks li.done .plain { color: var(--muted); }
   .day-tasks .mark { width: 18px; height: 18px; }
   .day-tasks .mark::after { left: 4px; top: 1px; width: 4px; height: 8px; }
@@ -583,7 +572,7 @@
 <main>
   <header>
     <div class="topbar">
-      <h1 class="wordmark">Ember<span class="tagline">Keep the fire within</span></h1>
+      <div class="brand"><h1 class="wordmark">Ember</h1><p class="tagline">Keep the fire within</p></div>
       <button type="button" class="theme" id="theme"></button>
     </div>
     <div class="hearth">
@@ -622,15 +611,17 @@
     <form id="form-today" class="field-row" autocomplete="off">
       <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
       <button type="button" class="later" id="later" title="Add this to tomorrow’s list (Cmd or Ctrl + Enter)"><span class="long">Add for tomorrow</span><span class="short">For tomorrow</span></button>
-      <label class="pick-day" title="Add this to a later day">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
-        <input type="date" id="pick-day" aria-label="Add this to a later day">
-      </label>
+      <span class="pick-day">
+        <button type="button" id="pick-day-btn" aria-label="Add this to a later day" title="Add this to a later day">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
+        </button>
+        <input type="date" id="pick-day" tabindex="-1" aria-hidden="true">
+      </span>
     </form>
-    <ul id="list-today" aria-label="Today's tasks"></ul>
-    <p class="note" id="note-today" hidden></p>
     <button type="button" class="link ahead-toggle" id="ahead-toggle" hidden aria-expanded="false" aria-controls="list-ahead"></button>
     <ul id="list-ahead" class="ahead" hidden aria-label="Tasks for later days"></ul>
+    <ul id="list-today" aria-label="Today's tasks"></ul>
+    <p class="note" id="note-today" hidden></p>
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
@@ -675,7 +666,7 @@
     <div class="actions"><button type="button" class="link" id="install-btn" hidden>Install Ember</button></div>
 
     <h2>Your data</h2>
-    <p class="lead">Everything Ember knows lives in this browser's local storage. Nothing is sent anywhere. No account, no cookies, no analytics.</p>
+    <p class="lead">Everything Ember knows lives in this browser and nowhere else. Days older than two years are dropped.</p>
     <dl class="facts">
       <div><dt>Saving to this device</dt><dd id="data-consent"></dd></div>
       <div><dt>Space used</dt><dd id="data-size"></dd></div>
@@ -689,7 +680,6 @@
       <button type="button" class="link" id="data-erase">Erase everything</button>
     </div>
     <p class="note" id="note-data" hidden></p>
-    <p class="small">Days older than two years are dropped automatically. Clearing this site's data in your browser also removes everything.</p>
   </section>
 </main>
 
@@ -1132,15 +1122,10 @@
       const when = document.createElement('span');
       when.className = 'when';
       when.textContent = dayLabel(key);
-      const bar = document.createElement('span');
-      bar.className = 'bar';
-      const fill = document.createElement('i');
-      fill.style.setProperty('--r', (t.done / t.total).toFixed(3));
-      bar.append(fill);
       const count = document.createElement('span');
       count.className = 'tally';
       count.textContent = t.text;
-      row.append(when, bar, count);
+      row.append(when, count);
       row.addEventListener('click', () => { historyDay = key; renderHistory(); });
       li.append(row);
       wrap.append(li);
@@ -1424,7 +1409,9 @@
   }
   // The prompt shortens on narrow screens so it never truncates beside the later-day controls.
   const narrow = matchMedia('(max-width: 400px)');
-  const prompt = () => narrow.matches ? 'What will you do?' : 'What will you do today?';
+  const tiny = matchMedia('(max-width: 300px)');
+  const prompt = () => tiny.matches ? 'Add a task' : narrow.matches ? 'What will you do?' : 'What will you do today?';
+  tiny.addEventListener('change', () => resetPrompt());
   const resetPrompt = () => { $('new-today').placeholder = prompt(); };
   narrow.addEventListener('change', resetPrompt);
   resetPrompt();
@@ -1443,7 +1430,13 @@
   }
   const addForTomorrow = () => addForDay(tomorrow(), narrow.matches ? 'Type it, then press For tomorrow' : 'Type it, then press Add for tomorrow');
   $('later').addEventListener('click', addForTomorrow);
-  $('pick-day').addEventListener('click', () => { $('pick-day').min = tomorrow(); });
+  $('pick-day-btn').addEventListener('click', () => {
+    const picker = $('pick-day');
+    picker.min = tomorrow();
+    picker.value = tomorrow();
+    if (typeof picker.showPicker === 'function') { try { picker.showPicker(); return; } catch {} }
+    picker.style.pointerEvents = 'auto'; picker.focus(); picker.click();
+  });
   $('pick-day').addEventListener('change', e => {
     const key = e.target.value;
     e.target.value = '';
