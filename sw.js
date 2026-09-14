@@ -1,6 +1,6 @@
 // Offline copy of Ember. The page itself is fetched network-first so updates land
 // on the next open; icons and the manifest are served from cache.
-const CACHE = 'ember-5';
+const CACHE = 'ember-6';
 const FILES = ['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './fonts/federo.woff2', './fonts/poiret-one.woff2'];
 
 self.addEventListener('install', e => {
@@ -15,7 +15,7 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin) return;
   const isPage = e.request.mode === 'navigate' || e.request.url.endsWith('/index.html');
   e.respondWith(isPage
-    ? fetch(e.request, { cache: 'no-cache' }).then(res => { caches.open(CACHE).then(c => c.put('./index.html', res.clone())); return res; })
+    ? fetch(e.request, { cache: 'no-cache' }).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return res; })
         .catch(() => caches.match('./index.html'))
-    : caches.match(e.request).then(hit => hit || fetch(e.request).then(res => { caches.open(CACHE).then(c => c.put(e.request, res.clone())); return res; })));
+    : caches.match(e.request).then(hit => hit || fetch(e.request).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return res; })));
 });

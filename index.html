@@ -14,8 +14,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Ember">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="theme-color" content="#faf7f2">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23bf4a1a' d='M12 2.5c.6 3.6 4.2 5.4 5.6 9.2 1.3 3.6-.4 8.3-5.6 8.3S5.1 15.3 6.4 11.7c.6-1.7 1.8-2.8 2.4-3.4.1 1.6.7 2.6 1.7 2.9.5-2.7-.2-5.8 1.5-8.7z'/%3E%3Cpath fill='%23faf7f2' opacity='.85' d='M12 11.5c.5 2 2.4 3 2.4 5.1a2.4 2.4 0 0 1-4.8 0c0-1.4 1-2.3 1.3-2.9.1.9.4 1.3.9 1.4.2-1.2-.1-2.4.2-3.6z'/%3E%3C/svg%3E">
 <style>
   /* Type ships with the app. Nothing is fetched from a font service. */
@@ -65,6 +64,7 @@
 
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  html { scrollbar-gutter: stable; }
   html, body { margin: 0; background: var(--paper); color: var(--ink); }
   body {
     font: 1.125rem/1.45 var(--body);
@@ -197,8 +197,9 @@
   }
   nav svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
   nav button:hover { color: var(--ink); }
-  nav button[aria-current="page"] { background: var(--ink); color: var(--paper); }
-  nav button[aria-current="page"] svg circle[fill] { fill: var(--ink); }
+  nav button[aria-current="page"] { background: var(--line); color: var(--ink); }
+  nav button[aria-current="page"] svg { stroke: var(--ember); }
+  nav button[aria-current="page"] svg circle[fill] { fill: var(--line); }
   @media (max-width: 700px) {
     nav {
       position: fixed;
@@ -232,9 +233,9 @@
     min-height: 44px;
     padding: 0.5rem 0;
     border: 0;
-    border-bottom: 2px solid var(--line);
+    border-bottom: 1px solid var(--line);
     border-radius: 0;
-    background: linear-gradient(var(--ember), var(--ember)) left bottom / 0% 2px no-repeat;
+    background: linear-gradient(var(--ember), var(--ember)) left bottom / 0% 1.5px no-repeat;
     color: var(--ink);
     font: inherit;
     font-size: 1.25rem;
@@ -275,12 +276,13 @@
   .pick-day button:hover { color: var(--ink); }
   .pick-day svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
   .pick-day input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
-  .ahead-toggle { display: block; margin: 0.25rem 0 0.5rem; padding: 0; color: var(--muted); font-size: 0.9375rem; }
+  .ahead-toggle { padding: 0; border: 0; background: none; color: var(--muted); font-family: var(--body); font-size: 1rem; letter-spacing: 0.01em; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .ahead-toggle:hover { color: var(--ink); }
   .ahead { margin-bottom: 1rem; }
   .ahead li { border-bottom: 1px solid var(--line); }
   .ahead .plain { padding: 0.55rem 0; gap: 0.7rem; }
   .ahead .when { flex: none; min-width: 6.5rem; color: var(--muted); font-size: 0.9375rem; }
-  .field:focus-visible { background-size: 100% 2px; }
+  .field:focus-visible { background-size: 100% 1.5px; }
 
   /* Rows: hairlines separate tasks. No cards. */
   ul { list-style: none; margin: 0; padding: 0; }
@@ -371,7 +373,7 @@
     opacity: 0;
     transition: opacity 0.15s var(--ease), color 0.15s var(--ease);
   }
-  li:hover .remove, li:focus-within .remove, li.done .remove { opacity: 1; }
+  li:hover .remove, li:focus-within .remove { opacity: 1; }
   .remove svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; fill: none; }
   .remove:hover { color: var(--ink); }
   @media (hover: none) { .remove { opacity: 1; } }
@@ -546,11 +548,11 @@
   /* Size ranges. Type scales with the device; the column widens a little on big screens. */
   @media (max-width: 400px) {
     html { font-size: 93.75%; }
-    main { padding: 1rem 0.9rem 4rem; }
+    main { padding-top: 1rem; padding-left: 0.9rem; padding-right: 0.9rem; }
   }
   @media (max-width: 290px) {
     html { font-size: 87.5%; }
-    main { padding: 0.6rem 0.6rem 3rem; }
+    main { padding-top: 0.6rem; padding-left: 0.6rem; padding-right: 0.6rem; }
     header { margin-bottom: 0.75rem; }
     .topbar { margin-bottom: 0.75rem; }
     .flame { width: 40px; height: 40px; }
@@ -598,7 +600,7 @@
       </svg>
       <div class="hearth-text">
         <p class="slogan" id="slogan"></p>
-        <p class="streak-line"><span class="count" id="count" aria-hidden="true"></span><span id="streak" role="status"></span></p>
+        <p class="streak-line" role="status"><span class="count" id="count"></span><span id="streak"></span></p>
       </div>
     </div>
   </header>
@@ -623,7 +625,7 @@
   </nav>
 
   <section id="view-today" aria-label="Today">
-    <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span></p>
+    <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span> <button type="button" class="ahead-toggle" id="ahead-toggle" hidden aria-expanded="false" aria-controls="list-ahead"></button></p>
     <form id="form-today" class="field-row" autocomplete="off">
       <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus maxlength="200">
       <button type="button" class="later" id="later" title="Add this to tomorrow’s list (Cmd or Ctrl + Enter)"><span class="long">Add for tomorrow</span><span class="short">For tomorrow</span></button>
@@ -634,19 +636,16 @@
         <input type="date" id="pick-day" tabindex="-1" aria-hidden="true">
       </span>
     </form>
-    <button type="button" class="link ahead-toggle" id="ahead-toggle" hidden aria-expanded="false" aria-controls="list-ahead"></button>
     <ul id="list-ahead" class="ahead" hidden aria-label="Tasks for later days"></ul>
     <ul id="list-today" aria-label="Today's tasks"></ul>
     <p class="note" id="note-today" hidden></p>
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
-    <p class="lead">Whatever you add here is on every new day’s list.</p>
     <form id="form-fuel" autocomplete="off">
       <input class="field" id="new-fuel" type="text" placeholder="Something you do every day" aria-label="New fuel item" maxlength="200">
     </form>
     <ul id="list-fuel" aria-label="Fuel items"></ul>
-    <p class="note" id="note-fuel" hidden></p>
   </section>
 
   <section id="view-history" aria-label="History" hidden>
@@ -702,7 +701,7 @@
 <dialog id="consent" aria-labelledby="consent-title">
   <div class="dialog-body">
     <h2 id="consent-title">Keep your list on this device?</h2>
-    <p>Ember saves your tasks, Fuel, streak, and theme in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
+    <p>Ember saves your tasks, streak, and theme in this browser's local storage. Nothing is sent anywhere. There is no account, no cookie, no analytics.</p>
     <p>You can export or erase all of it any time under Settings.</p>
   </div>
   <form method="dialog">
@@ -823,8 +822,10 @@
   const dayDone = key => { const d = state.days[key]; return !!(d && d.length && d.every(x => x.d)); };
   function streak() {
     const todayDone = dayDone(today());
+    if (todayDone) state.lit = today();
     let n = 0;
     for (let i = todayDone ? 0 : 1; dayDone(daysAgo(i)); i++) n++;
+    if (!todayDone && state.lit === today()) n = Math.max(n, 1);
     if (n > (state.streak.best || 0)) state.streak.best = n;
     return { n, todayDone };
   }
@@ -847,6 +848,7 @@
     const root = document.documentElement;
     if (state.theme === 'system') root.removeAttribute('data-theme');
     else root.dataset.theme = state.theme;
+    $('theme-color').content = getComputedStyle(root).getPropertyValue('--paper').trim();
     const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
     $('theme').textContent = next === 'dark' ? 'Dim' : 'Bright';
     $('theme').setAttribute('aria-label', `Switch to ${next} theme`);
@@ -889,16 +891,15 @@
         ? `No streak right now. Your best is ${state.streak.best} days.`
         : 'No streak yet. Finish today’s list to start one.';
     } else if (todayDone) {
-      line = `-day streak. Today is done.`;
+      line = `-day streak.`;
     } else {
       line = `-day streak. Finish today to keep it.`;
     }
     $('streak').textContent = line;
-    $('streak').setAttribute('aria-label', alive ? `${n}${line}` : line);
 
     const slogan = !alive ? (state.streak.best > 1 ? 'Light it again.' : 'Light it up.')
       : !todayDone ? (n < 3 ? 'Keep it going.' : 'Don’t let it go out.')
-      : n < 3 ? 'You are fire.'
+      : n < 3 ? 'First light.'
       : n < 7 ? 'Keep it burning.'
       : n < 30 ? 'You are on fire.'
       : 'Nothing puts you out.';
@@ -917,6 +918,7 @@
   function showView(name) {
     if (name !== 'history') historyDay = null;
     view = name;
+    scrollTo(0, 0);
     for (const b of document.querySelectorAll('nav button')) {
       const on = b.dataset.view === name;
       if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
@@ -987,14 +989,16 @@
   // FLIP: remember where rows were, re-render, then glide them to where they are now.
   function renderList(list, items, rowFor, enterId) {
     const before = new Map();
-    if (!reduceMotion) for (const li of list.children) before.set(li.dataset.id, li.getBoundingClientRect().top);
+    // Past forty rows the glide is not worth two layout passes.
+    const flip = !reduceMotion && list.children.length <= 40;
+    if (flip) for (const li of list.children) before.set(li.dataset.id, li.getBoundingClientRect().top);
     list.textContent = '';
     for (const t of items) {
       const li = rowFor(t);
       if (li.dataset.id === enterId && !reduceMotion) li.classList.add('enter');
       list.append(li);
     }
-    if (reduceMotion) return;
+    if (!flip) return;
     for (const li of list.children) {
       const was = before.get(li.dataset.id);
       if (was === undefined) continue;
@@ -1020,7 +1024,7 @@
     if (storageBroken) {
       note.textContent = 'Your browser is blocking storage, so this list will vanish when you close the tab. Private window?';
       note.className = 'note error'; note.hidden = false;
-    } else if (!state.consent) {
+    } else if (!state.consent && !$('consent').open) {
       note.textContent = 'Not saving to this device. This list lasts until you close the tab. Turn saving on under Settings.';
       note.className = 'note error'; note.hidden = false;
     } else note.hidden = true;
@@ -1059,9 +1063,7 @@
   }
   function renderFuel(enterId) {
     renderList($('list-fuel'), state.fuel, fuelRow, enterId);
-    const note = $('note-fuel');
-    note.hidden = state.fuel.length > 0;
-    note.textContent = 'No fuel yet. Add the things you do every day, like a walk or ten pages.';
+
   }
 
   /* History */
@@ -1119,12 +1121,15 @@
       const t = tasks && tasks.length ? tally(tasks) : null;
       cell.setAttribute('aria-label', `${dayLabel(key)}: ${t ? t.text + ' done' : 'nothing listed'}`);
       cell.disabled = !t;
-      if (t) cell.addEventListener('click', () => { historyDay = key; renderHistory(); });
+      if (t) cell.addEventListener('click', () => { historyDay = key; scrollTo(0, 0); renderHistory(); });
+      cell.tabIndex = -1;
       grid.append(cell);
     }
-    $('grid-lead').textContent = listed
-      ? `${litDays} of the last ${listed} listed day${listed === 1 ? '' : 's'} fully done.`
-      : 'The last five weeks.';
+    const cells = [...grid.querySelectorAll('.cell:not(.spacer)')];
+    const live = cells.filter(c => !c.disabled);
+    if (live.length) live[live.length - 1].tabIndex = 0;
+    $('grid-lead').hidden = listed < 7;
+    $('grid-lead').textContent = `${litDays} of the last ${listed} listed days fully done.`;
 
     const keys = Object.keys(state.days).filter(k => k < today() && state.days[k].length).sort().reverse();
     const wrap = $('days');
@@ -1144,7 +1149,7 @@
       count.className = 'tally';
       count.textContent = t.text;
       row.append(when, count);
-      row.addEventListener('click', () => { historyDay = key; renderHistory(); });
+      row.addEventListener('click', () => { historyDay = key; scrollTo(0, 0); renderHistory(); });
       li.append(row);
       wrap.append(li);
     }
@@ -1163,7 +1168,7 @@
       const ul = $(id);
       ul.textContent = '';
       $(hid).hidden = items.length === 0;
-      $(hid).textContent = `${label} (${items.length})`;
+      $(hid).textContent = label;
       for (const x of items) {
         const li = document.createElement('li');
         if (x.d) li.classList.add('done');
@@ -1185,7 +1190,24 @@
     fill('day-done', 'day-done-h', tasks.filter(x => x.d), 'Done');
     fill('day-open', 'day-open-h', tasks.filter(x => !x.d), 'Not done');
   }
-  $('history-back').addEventListener('click', () => { historyDay = null; renderHistory(); });
+  // Arrow keys walk the grid; Home and End jump to its ends. One Tab stop for 35 days.
+  $('grid').addEventListener('keydown', e => {
+    const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 7, ArrowUp: -7 }[e.key];
+    if (step === undefined && e.key !== 'Home' && e.key !== 'End') return;
+    const cells = [...$('grid').querySelectorAll('.cell:not(.spacer)')];
+    let i = cells.indexOf(document.activeElement);
+    if (i < 0) return;
+    e.preventDefault();
+    if (e.key === 'Home') i = -1; else if (e.key === 'End') i = cells.length;
+    const dir = e.key === 'Home' ? 1 : e.key === 'End' ? -1 : Math.sign(step);
+    let j = e.key === 'Home' || e.key === 'End' ? i + dir : i + step;
+    while (j >= 0 && j < cells.length && cells[j].disabled) j += dir;
+    if (j < 0 || j >= cells.length) return;
+    for (const c of cells) c.tabIndex = -1;
+    cells[j].tabIndex = 0;
+    cells[j].focus();
+  });
+  $('history-back').addEventListener('click', () => { historyDay = null; scrollTo(0, 0); renderHistory(); });
   $('days-more').addEventListener('click', () => { historyLimit += 30; renderHistory(); });
 
   /* Install. The browser decides what is possible; the row says the right thing for it. */
@@ -1218,10 +1240,11 @@
   /* Data */
   function renderData(message) {
     renderInstall();
-    $('data-consent').textContent = state.consent ? `On, since ${dayLabel(state.consent)}` : 'Off';
+    const since = state.consent ? dayLabel(state.consent) : '';
+    $('data-consent').textContent = state.consent ? `On, since ${since === 'Today' || since === 'Yesterday' ? since.toLowerCase() : since}` : 'Off';
     const bytes = new Blob([JSON.stringify(state)]).size;
     $('data-size').textContent = bytes < 1024 ? `${bytes} bytes` : `${(bytes / 1024).toFixed(1)} KB`;
-    $('data-days').textContent = String(Object.keys(state.days).length);
+    $('data-days').textContent = String(Object.keys(state.days).filter(k => k <= today() && state.days[k].length).length);
     $('data-toggle').textContent = state.consent ? 'Stop saving' : 'Start saving';
     const note = $('note-data');
     note.hidden = !message;
@@ -1451,6 +1474,7 @@
   $('pick-day-btn').addEventListener('click', () => {
     const picker = $('pick-day');
     picker.min = tomorrow();
+    picker.max = dayOf(new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
     picker.value = tomorrow();
     if (typeof picker.showPicker === 'function') { try { picker.showPicker(); return; } catch {} }
     picker.style.pointerEvents = 'auto'; picker.focus(); picker.click();
@@ -1471,7 +1495,7 @@
     toggle.hidden = n === 0;
     if (n === 0) { list.hidden = true; aheadOpen = false; return; }
     const onlyTomorrow = keys.length === 1 && keys[0] === tomorrow();
-    toggle.textContent = (n === 1 ? 'One task' : `${n} tasks`) + (onlyTomorrow ? ' waiting for tomorrow' : ' waiting for later days') + (aheadOpen ? '' : '. Show');
+    toggle.textContent = `${n} for ${onlyTomorrow ? 'tomorrow' : 'later'}.`;
     toggle.setAttribute('aria-expanded', String(aheadOpen));
     list.hidden = !aheadOpen;
     list.textContent = '';
