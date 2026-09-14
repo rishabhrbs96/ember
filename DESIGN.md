@@ -85,7 +85,7 @@ No fades on view switches, no ambient movement anywhere else. All of it is off u
 
 ## Data and consent
 
-A first-run dialog explains that everything stays in the browser and asks before anything is written. Settings shows what is stored and offers export, import, stop, and erase. The first-run dialog stays by owner decision, recorded in the audit response.
+A first-run dialog explains that everything stays in the browser and asks before anything is written. Settings shows what is stored and offers export, import, stop, and erase. The first-run dialog stays by owner decision.
 
 While nothing is being saved, a standing banner at the top of every view says so, with a Start saving link in it. It has an ember border because losing a list is the one real risk in the app. The same banner carries the storage-blocked message.
 
