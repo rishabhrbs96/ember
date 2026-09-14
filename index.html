@@ -471,67 +471,67 @@
   }
   .link:hover { color: var(--ink); }
 
-  /* History: five weeks of embers in a calendar grid, a row per day with a bar, one page per day. */
+  /* History: one month at a time, laid out as a calendar. Each day is a button; its state is its fill. */
+  .month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+  .month-title { margin: 0; font: 400 1.35rem/1.2 var(--display); letter-spacing: 0.04em; }
+  .month-btn {
+    width: 44px; height: 44px;
+    display: grid; place-items: center;
+    padding: 0; border: 0; background: none;
+    color: var(--muted); cursor: pointer;
+    transition: color 0.15s var(--ease);
+  }
+  .month-btn:hover:not(:disabled) { color: var(--ink); }
+  .month-btn:disabled { color: var(--line); cursor: default; }
+  .month-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
     font-size: 0.75rem;
+    letter-spacing: 0.08em;
     color: var(--muted);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
   .grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-    margin: 0 0 1.75rem;
+    gap: 4px;
+    margin: 0 0 1rem;
   }
   .cell {
     width: 100%;
-    max-width: 44px;
+    max-width: 48px;
     aspect-ratio: 1;
     justify-self: center;
     display: grid;
     place-items: center;
     padding: 0;
-    border: 0;
+    border: 1.5px solid transparent;
     border-radius: 50%;
     background: none;
+    color: var(--muted);
+    font-family: var(--body);
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
     cursor: pointer;
-  }
-  .cell:disabled { cursor: default; }
-  .cell.spacer { visibility: hidden; }
-  .cell::before {
-    content: "";
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    border: 2px solid var(--line);
     animation: dotIn 0.3s var(--ease) both;
     animation-delay: calc(var(--i, 0) * 6ms);
-    transition: transform 0.15s var(--ease);
+    transition: transform 0.15s var(--ease), border-color 0.15s var(--ease);
   }
-  @keyframes dotIn { from { opacity: 0; transform: scale(0.4); } }
-  .cell:hover:not(:disabled)::before { transform: scale(1.25); }
-  .cell.some::before { border-color: var(--muted); }
-  .cell.part::before { border-color: var(--ember); }
-  .cell.lit::before { background: var(--ember); border-color: var(--ember); }
-  .cell.today::before { outline: 2px solid var(--muted); outline-offset: 2px; }
-
-  .days li { border-bottom: 1px solid var(--line); }
-  .dayrow {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    min-height: 52px;
-    padding: 0.6rem 0;
-    border: 0;
-    background: none;
-    text-align: left;
-    cursor: pointer;
-  }
-  .dayrow:hover .when { color: var(--ink); }
-  .dayrow .when { flex: 1; transition: color 0.15s var(--ease); }
+  @keyframes dotIn { from { opacity: 0; transform: scale(0.6); } }
+  .cell:disabled { cursor: default; }
+  .cell.spacer { visibility: hidden; }
+  .cell.future { color: var(--line); }
+  .cell:hover:not(:disabled) { transform: scale(1.08); }
+  .cell.some { border-color: var(--muted); color: var(--ink); }
+  .cell.part { border-color: var(--ember); color: var(--ink); }
+  .cell.lit { background: var(--ember); border-color: var(--ember); color: var(--paper); }
+  .cell.today { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+  .month-lead { margin: 0 0 0.75rem; }
+  .key { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem; margin: 0; color: var(--muted); font-size: 0.875rem; }
+  .key .cell { width: 26px; height: 26px; max-width: none; aspect-ratio: auto; font-size: 0.75rem; animation: none; cursor: default; margin-right: 0.15rem; }
+  .key .cell + span, .key span:not(.cell) { margin-right: 0.6rem; }
   .tally { flex: none; color: var(--muted); font-size: 1rem; font-variant-numeric: tabular-nums; }
 
   .back { padding: 0; margin-bottom: 0.75rem; }
@@ -650,15 +650,23 @@
 
   <section id="view-history" aria-label="History" hidden>
     <div id="history-all">
-      <p class="lead" id="grid-lead"></p>
+      <div class="month-nav">
+        <button type="button" class="month-btn" id="month-prev" aria-label="Earlier month">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <h2 class="month-title" id="month-title" aria-live="polite"></h2>
+        <button type="button" class="month-btn" id="month-next" aria-label="Later month">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
       <div class="weekdays" aria-hidden="true"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
-      <div class="grid" id="grid" aria-label="Last five weeks"></div>
-      <ul id="days" class="days" aria-label="Past days"></ul>
-      <div class="actions"><button type="button" class="link" id="days-more" hidden>Show older days</button></div>
+      <div class="grid" id="grid" aria-label="Days of the month"></div>
+      <p class="lead month-lead" id="month-lead"></p>
+      <p class="key" aria-hidden="true"><span class="cell lit">1</span> all done <span class="cell part">2</span> some done <span class="cell some">3</span> none done</p>
       <p class="note" id="note-history" hidden></p>
     </div>
     <div id="history-day" hidden>
-      <button type="button" class="link back" id="history-back">All days</button>
+      <button type="button" class="link back" id="history-back">Back to the month</button>
       <h2 class="day-title" id="day-title"></h2>
       <p class="lead" id="day-tally"></p>
       <h3 class="group" id="day-done-h"></h3>
@@ -1091,73 +1099,66 @@
   }
 
   let historyDay = null;
-  let historyLimit = 30;
+  let historyMonth = today().slice(0, 7);
   const dayState = tasks => !tasks || !tasks.length ? '' : tasks.every(x => x.d) ? 'lit' : tasks.some(x => x.d) ? 'part' : 'some';
+  const monthOf = (y, m) => `${y}-${String(m).padStart(2, '0')}`;
+  const shiftMonth = (ym, by) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + by, 1); return monthOf(d.getFullYear(), d.getMonth() + 1); };
+  const earliestMonth = () => { const keys = Object.keys(state.days).filter(k => state.days[k].length).sort(); return keys.length ? keys[0].slice(0, 7) : today().slice(0, 7); };
 
   function renderHistory() {
     $('history-all').hidden = !!historyDay;
     $('history-day').hidden = !historyDay;
     if (historyDay) return renderHistoryDay(historyDay);
 
-    // Five weeks ending today, Monday first.
+    const thisMonth = today().slice(0, 7);
+    const first = earliestMonth();
+    if (historyMonth > thisMonth) historyMonth = thisMonth;
+    if (historyMonth < first) historyMonth = first;
+    const [y, m] = historyMonth.split('-').map(Number);
+    $('month-title').textContent = `${FULL_MONTHS[m - 1]} ${y}`;
+    $('month-prev').disabled = historyMonth <= first;
+    $('month-next').disabled = historyMonth >= thisMonth;
+
     const grid = $('grid');
     grid.textContent = '';
-    const first = new Date(); first.setDate(first.getDate() - 34);
-    const lead = (first.getDay() + 6) % 7;
+    const lead = (new Date(y, m - 1, 1).getDay() + 6) % 7;
     for (let i = 0; i < lead; i++) {
       const sp = document.createElement('span'); sp.className = 'cell spacer'; grid.append(sp);
     }
+    const daysInMonth = new Date(y, m, 0).getDate();
     let litDays = 0, listed = 0;
-    for (let n = 34; n >= 0; n--) {
-      const key = daysAgo(n);
-      const tasks = state.days[key];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const key = `${historyMonth}-${String(d).padStart(2, '0')}`;
+      const future = key > today();
+      const tasks = future ? null : state.days[key];
       const st = dayState(tasks);
       if (st) listed++;
       if (st === 'lit') litDays++;
       const cell = document.createElement('button');
       cell.type = 'button';
-      cell.className = 'cell' + (st ? ' ' + st : '') + (n === 0 ? ' today' : '');
-      cell.style.setProperty('--i', 34 - n);
+      cell.className = 'cell' + (st ? ' ' + st : '') + (key === today() ? ' today' : '') + (future ? ' future' : '');
+      cell.style.setProperty('--i', d);
+      cell.textContent = String(d);
       const t = tasks && tasks.length ? tally(tasks) : null;
-      cell.setAttribute('aria-label', `${dayLabel(key)}: ${t ? t.text + ' done' : 'nothing listed'}`);
+      cell.setAttribute('aria-label', `${dayLabel(key)}: ${t ? t.text + ' done' : future ? 'ahead' : 'nothing listed'}`);
       cell.disabled = !t;
       if (t) cell.addEventListener('click', () => { historyDay = key; scrollTo(0, 0); renderHistory(); });
       cell.tabIndex = -1;
       grid.append(cell);
     }
-    const cells = [...grid.querySelectorAll('.cell:not(.spacer)')];
-    const live = cells.filter(c => !c.disabled);
+    const live = [...grid.querySelectorAll('.cell:not(.spacer)')].filter(c => !c.disabled);
     if (live.length) live[live.length - 1].tabIndex = 0;
-    $('grid-lead').hidden = listed < 7;
-    $('grid-lead').textContent = `${litDays} of the last ${listed} listed days fully done.`;
 
-    const keys = Object.keys(state.days).filter(k => k < today() && state.days[k].length).sort().reverse();
-    const wrap = $('days');
-    wrap.textContent = '';
-    for (const key of keys.slice(0, historyLimit)) {
-      const tasks = state.days[key];
-      const t = tally(tasks);
-      const li = document.createElement('li');
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'dayrow';
-      row.setAttribute('aria-label', `${dayLabel(key)}, ${t.text} done. Open the day.`);
-      const when = document.createElement('span');
-      when.className = 'when';
-      when.textContent = dayLabel(key);
-      const count = document.createElement('span');
-      count.className = 'tally';
-      count.textContent = t.text;
-      row.append(when, count);
-      row.addEventListener('click', () => { historyDay = key; scrollTo(0, 0); renderHistory(); });
-      li.append(row);
-      wrap.append(li);
-    }
-    $('days-more').hidden = keys.length <= historyLimit;
+    const monthLead = $('month-lead');
+    monthLead.hidden = listed === 0;
+    monthLead.textContent = `${litDays} of ${listed} listed day${listed === 1 ? '' : 's'} fully done.`;
+    const anyEver = Object.keys(state.days).some(k => k < today() && state.days[k].length);
     const note = $('note-history');
-    note.hidden = keys.length > 0;
+    note.hidden = anyEver;
     note.textContent = 'Nothing here yet. Tomorrow, today will be.';
   }
+  $('month-prev').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, -1); renderHistory(); });
+  $('month-next').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, 1); renderHistory(); });
 
   function renderHistoryDay(key) {
     const tasks = state.days[key] || [];
@@ -1190,8 +1191,16 @@
     fill('day-done', 'day-done-h', tasks.filter(x => x.d), 'Done');
     fill('day-open', 'day-open-h', tasks.filter(x => !x.d), 'Not done');
   }
-  // Arrow keys walk the grid; Home and End jump to its ends. One Tab stop for 35 days.
+  // Arrow keys walk the month; Home and End jump to its ends; PageUp and PageDown change month.
   $('grid').addEventListener('keydown', e => {
+    if (e.key === 'PageUp' || e.key === 'PageDown') {
+      e.preventDefault();
+      historyMonth = shiftMonth(historyMonth, e.key === 'PageUp' ? -1 : 1);
+      renderHistory();
+      const first = $('grid').querySelector('.cell[tabindex="0"]');
+      if (first) first.focus();
+      return;
+    }
     const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 7, ArrowUp: -7 }[e.key];
     if (step === undefined && e.key !== 'Home' && e.key !== 'End') return;
     const cells = [...$('grid').querySelectorAll('.cell:not(.spacer)')];
@@ -1208,7 +1217,6 @@
     cells[j].focus();
   });
   $('history-back').addEventListener('click', () => { historyDay = null; scrollTo(0, 0); renderHistory(); });
-  $('days-more').addEventListener('click', () => { historyLimit += 30; renderHistory(); });
 
   /* Install. The browser decides what is possible; the row says the right thing for it. */
   let installPrompt = null;
