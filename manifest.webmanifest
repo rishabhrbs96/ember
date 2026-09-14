@@ -1,7 +1,7 @@
 {
   "name": "Ember",
   "short_name": "Ember",
-  "description": "Keep the fire within. A to-do list that stays on your device, with a streak to keep.",
+  "description": "Keep the fire within. A to-do list that stays on your device and helps you keep a daily streak.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

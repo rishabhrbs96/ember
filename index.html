@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Ember. Keep the fire within. A to-do list that stays in your browser, with a streak to keep.">
+<meta name="description" content="Ember. Keep the fire within. A to-do list that stays on your device and helps you keep a daily streak.">
 <title>Ember</title>
 <link rel="preload" href="fonts/ranade-light.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/satoshi-light.woff2" as="font" type="font/woff2" crossorigin>
@@ -648,7 +648,7 @@
   <section id="view-today" aria-label="Today">
     <p class="date-line"><span id="date-today"></span> <span class="date-hint" id="date-hint"></span> <button type="button" class="ahead-toggle" id="ahead-toggle" hidden aria-expanded="false" aria-controls="list-ahead"></button></p>
     <form id="form-today" autocomplete="off">
-      <input class="field" id="new-today" type="text" placeholder="Add a task for today" aria-label="New task" autofocus maxlength="200">
+      <input class="field" id="new-today" type="text" placeholder="Add a task for today" aria-label="New task for today" autofocus maxlength="200">
     </form>
     <div class="when" role="group" aria-label="Which day to add it to">
       <span class="when-label">Add to</span>
@@ -665,7 +665,7 @@
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
-    <p class="lead">Fuel holds the tasks you do every day. Each one is added to every new day’s list automatically.</p>
+    <p class="lead">Fuel is your list of daily tasks. Each is added to every new day automatically.</p>
     <form id="form-fuel" autocomplete="off">
       <input class="field" id="new-fuel" type="text" placeholder="Add a daily task" aria-label="New Fuel item" maxlength="200">
     </form>
@@ -687,7 +687,7 @@
       <div class="weekdays" aria-hidden="true"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
       <div class="grid" id="grid" aria-label="Days of the month"></div>
       <p class="lead month-lead" id="month-lead"></p>
-      <p class="key" aria-hidden="true"><span class="cell lit">1</span> completed <span class="cell part">2</span> partly completed <span class="cell some">3</span> not completed</p>
+      <p class="key" aria-hidden="true"><span class="cell lit">1</span> All completed <span class="cell part">2</span> Partly completed <span class="cell some">3</span> Not completed</p>
       <p class="note" id="note-history" hidden></p>
     </div>
     <div id="history-day" hidden>
@@ -724,9 +724,9 @@
     <section class="group-block" aria-labelledby="h-data">
       <h2 id="h-data">Your data</h2>
       <div class="group-body">
-        <p class="lead">All data is stored in this browser and nowhere else. Days older than two years are removed automatically.</p>
+        <p class="lead">Ember never sends your data anywhere. When saving is on, it stays on this device. Days older than two years are removed automatically.</p>
         <dl class="facts">
-          <div><dt>Saving to this device</dt><dd id="data-consent"></dd></div>
+          <div><dt>Saving on this device</dt><dd id="data-consent"></dd></div>
           <div><dt>Space used</dt><dd id="data-size"></dd></div>
           <div><dt>Days recorded</dt><dd id="data-days"></dd></div>
         </dl>
@@ -746,11 +746,11 @@
 <dialog id="consent" aria-labelledby="consent-title">
   <div class="dialog-body">
     <h2 id="consent-title">Keep your list on this device?</h2>
-    <p>Ember stores your tasks, streak, and theme in this browser. Nothing is sent anywhere: no account, no cookies, no analytics.</p>
-    <p>The data can be exported or erased at any time under Settings.</p>
+    <p>Ember saves your tasks, streak, and theme on this device. Nothing is sent anywhere. There is no account, no cookie, and no analytics.</p>
+    <p>Without saving, your list is cleared when you close Ember. You can export or erase saved data under Settings.</p>
   </div>
   <form method="dialog">
-    <button type="submit" value="no" class="secondary">Not now</button>
+    <button type="submit" value="no" class="secondary">Continue without saving</button>
     <button type="submit" value="yes" class="primary">Save on this device</button>
   </form>
 </dialog>
@@ -770,9 +770,9 @@
 
 <dialog id="resume-dialog" aria-labelledby="resume-title">
   <div class="dialog-body">
-    <h2 id="resume-title">Two versions of this list</h2>
-    <p>This list has changed since it was last saved. Choose which version to keep.</p>
-    <p>The saved copy discards the changes made here. Merge keeps both. This session replaces the saved copy.</p>
+    <h2 id="resume-title">Which version should Ember keep?</h2>
+    <p>This list has changed since it was last saved.</p>
+    <p>Saved copy discards changes from this session. Merge combines both versions. This session replaces the saved copy on this device.</p>
   </div>
   <form method="dialog">
     <button type="submit" value="no" class="secondary">Cancel</button>
@@ -921,7 +921,7 @@
     $('theme-color').content = getComputedStyle(root).getPropertyValue('--paper').trim();
     const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
     $('theme').textContent = next === 'dark' ? 'Dim' : 'Bright';
-    $('theme').setAttribute('aria-label', next === 'dark' ? 'Dim the theme' : 'Brighten the theme');
+    $('theme').setAttribute('aria-label', next === 'dark' ? 'Switch to Dim' : 'Switch to Bright');
     for (const b of document.querySelectorAll('[data-theme-choice]')) {
       b.setAttribute('aria-pressed', String(b.dataset.themeChoice === state.theme));
     }
@@ -958,8 +958,8 @@
     let line;
     if (!alive) {
       line = state.streak.best > 1
-        ? `No current streak. Your best is ${state.streak.best} day${state.streak.best === 1 ? '' : 's'}.`
-        : 'No streak yet. Complete today’s list to begin one.';
+        ? `No streak right now. Your best is ${state.streak.best} day${state.streak.best === 1 ? '' : 's'}.`
+        : tasks.length === 0 ? 'No streak yet. Add a task to begin.' : 'No streak yet. Complete today’s list to begin one.';
     } else if (todayDone) {
       line = `-day streak.`;
     } else {
@@ -968,7 +968,7 @@
     $('streak').textContent = line;
 
     const slogan = !alive ? (state.streak.best > 1 ? 'Light it again.' : 'Light it up.')
-      : !todayDone ? (n < 3 ? 'Still warm.' : 'Keep it alight.')
+      : !todayDone ? (n < 3 ? 'Still warm.' : 'Keep the flame alive.')
       : n < 3 ? 'First light.'
       : n < 7 ? 'Keep it burning.'
       : n < 30 ? 'Burning bright.'
@@ -1097,7 +1097,7 @@
     const { n, todayDone } = streak();
     renderAhead();
     $('date-today').textContent = longDate(today());
-    $('date-hint').textContent = tasks.length === 0 ? 'Nothing planned.'
+    $('date-hint').textContent = tasks.length === 0 ? 'No tasks yet.'
       : todayDone ? 'All completed.'
       : `${open.length} remaining.`;
   }
@@ -1129,7 +1129,7 @@
     renderList($('list-fuel'), state.fuel, fuelRow, enterId);
     const note = $('note-fuel');
     note.hidden = state.fuel.length > 0;
-    note.textContent = 'No daily tasks yet. For example: Stretch, or Read ten pages.';
+    note.textContent = 'No daily tasks yet. Add something like Stretch or Read ten pages.';
 
   }
 
@@ -1210,11 +1210,11 @@
 
     const monthLead = $('month-lead');
     monthLead.hidden = listed === 0;
-    monthLead.textContent = `${litDays} of ${listed} listed day${listed === 1 ? '' : 's'} completed in full.`;
+    monthLead.textContent = `${litDays} of ${listed} day${listed === 1 ? '' : 's'} with tasks fully completed.`;
     const anyEver = Object.keys(state.days).some(k => k < today() && state.days[k].length);
     const note = $('note-history');
     note.hidden = anyEver;
-    note.textContent = 'No past days yet. Today will appear here tomorrow.';
+    note.textContent = 'No history yet. Today appears here tomorrow.';
   }
   $('month-prev').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, -1); renderHistory(); });
   $('month-next').addEventListener('click', () => { historyMonth = shiftMonth(historyMonth, 1); renderHistory(); });
@@ -1242,7 +1242,7 @@
         text.textContent = x.t;
         p.append(mark, text);
         if (x.k) p.append(flameIcon('fuel-mark'));
-        p.setAttribute('aria-label', x.t);
+        p.setAttribute('aria-label', (x.d ? 'Completed: ' : 'Not completed: ') + x.t);
         li.append(p);
         ul.append(li);
       }
@@ -1290,7 +1290,7 @@
     if (standalone) text.textContent = 'Installed. Ember opens from your home screen and works offline.';
     else if (installPrompt) { text.textContent = 'Put Ember on your home screen. It opens like an app and works offline.'; btn.hidden = false; }
     else if (ios) text.textContent = 'In Safari, tap Share, then “Add to Home Screen”. Ember opens like an app and works offline.';
-    else if (location.protocol === 'file:') text.textContent = 'Installation requires Ember to be served over HTTPS rather than opened as a file.';
+    else if (location.protocol === 'file:') text.textContent = 'To install Ember, open it from a secure web address.';
     else text.textContent = 'In your browser’s menu, choose “Install app” or “Add to Home Screen”. Ember opens like an app and works offline.';
   }
   // Offered once, after the first-run question, and only where installing is possible.
@@ -1366,15 +1366,15 @@
     save();
     applyTheme();
     render();
-    if (view === 'settings') renderData(storageBroken ? 'This browser is not allowing Ember to save. Private windows commonly cause this.' : 'Saving resumed.');
+    if (view === 'settings') renderData(storageBroken ? 'Ember cannot save on this device. Private mode may be the cause.' : 'Saving on this device.');
   }
   $('data-toggle').addEventListener('click', async () => {
     if (state.consent) {
-      if (!await ask('Stop saving?', 'The saved copy remains as it is. From this point, changes are kept only until the tab is closed. To remove the saved copy, use Erase all data.', 'Stop saving')) return;
+      if (!await ask('Stop saving?', 'Your saved copy stays on this device. New changes last only until you close Ember. To remove the saved copy, choose Erase all data.', 'Stop saving')) return;
       state.consent = null;
       try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
       render();
-      renderData('Saving is off. This list will be lost when the tab is closed.');
+      renderData('Saving is off. This list will be cleared when you close Ember.');
     } else startSaving();
   });
   /* Import. The file is checked field by field; anything malformed is dropped and counted. */
@@ -1441,7 +1441,7 @@
     const parts = [`${dayCount} day${dayCount === 1 ? '' : 's'} with tasks`, `${fuelCount} Fuel item${fuelCount === 1 ? '' : 's'}`];
     if (data.streak.best) parts.push(`a best streak of ${data.streak.best} day${data.streak.best === 1 ? '' : 's'}`);
     const list = parts.length > 1 ? parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1] : parts[0];
-    $('import-text').textContent = `The file holds ${list}.` + (dropped ? ` ${dropped} unreadable entr${dropped === 1 ? 'y was' : 'ies were'} skipped.` : '');
+    $('import-text').textContent = `The file holds ${list}.` + (dropped ? ` ${dropped} invalid entr${dropped === 1 ? 'y was' : 'ies were'} skipped.` : '');
     const dlg = $('import-dialog');
     const choice = await new Promise(resolve => { dlg.addEventListener('close', () => resolve(dlg.returnValue), { once: true }); dlg.showModal(); });
     if (choice === 'replace') {
@@ -1454,8 +1454,8 @@
     save();
     applyTheme();
     render();
-    const counts = `${dayCount} day${dayCount === 1 ? '' : 's'} and ${fuelCount} Fuel item${fuelCount === 1 ? '' : 's'} from the file.`;
-    renderData((choice === 'replace' ? 'Replaced. ' : 'Merged. ') + counts);
+    const counts = `${dayCount} day${dayCount === 1 ? '' : 's'} and ${fuelCount} Fuel item${fuelCount === 1 ? '' : 's'}`;
+    renderData(choice === 'replace' ? `Replaced your data with ${counts}.` : `Merged ${counts} from the file.`);
   });
 
   $('data-export').addEventListener('click', () => {
@@ -1467,10 +1467,10 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    renderData('Exported. The file contains every day, every Fuel item, and the streak.');
+    renderData('Exported. The file includes your tasks, Fuel items, streak, and settings.');
   });
   $('data-erase').addEventListener('click', async () => {
-    if (!await ask('Erase all data?', 'Every task, Fuel item, past day, and the streak will be removed from this browser. This cannot be undone.', 'Erase all data')) return;
+    if (!await ask('Erase all data?', 'Every task, Fuel item, past day, and the streak will be removed from this device. This cannot be undone.', 'Erase all data')) return;
     const consent = state.consent;
     state = fresh();
     state.consent = consent;
@@ -1486,11 +1486,11 @@
     const banner = $('save-banner');
     const btn = $('save-banner-btn');
     if (storageBroken) {
-      $('save-banner-text').textContent = 'This browser is not allowing Ember to save. The list will be lost when the tab is closed. Private windows commonly cause this.';
+      $('save-banner-text').textContent = 'Ember cannot save on this device. This list will be cleared when you close Ember. Private mode may be the cause.';
       btn.hidden = true;
       banner.hidden = false;
     } else if (!state.consent && !$('consent').open) {
-      $('save-banner-text').textContent = 'Saving is off. This list will be lost when the tab is closed.';
+      $('save-banner-text').textContent = 'Saving is off. This list will be cleared when you close Ember.';
       btn.hidden = false;
       banner.hidden = false;
     } else banner.hidden = true;
@@ -1592,7 +1592,10 @@
     if (addWhen === 'picked' && pickedKey) return `Add a task for ${dayLabel(pickedKey)}`;
     return narrow.matches ? 'Add a task' : 'Add a task for today';
   };
-  function resetPrompt() { $('new-today').placeholder = prompt(); }
+  function resetPrompt() {
+    $('new-today').placeholder = prompt();
+    $('new-today').setAttribute('aria-label', addWhen === 'tomorrow' ? 'New task for tomorrow' : addWhen === 'picked' && pickedKey ? `New task for ${dayLabel(pickedKey)}` : 'New task for today');
+  }
   tiny.addEventListener('change', resetPrompt);
   narrow.addEventListener('change', resetPrompt);
   resetPrompt();

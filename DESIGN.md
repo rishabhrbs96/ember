@@ -109,7 +109,7 @@ Fuel is the list of things you do every day. Anything on it is added to every ne
 
 ## Voice
 
-Professional and calm, in the register of a well-run private service. Complete sentences, plain words, no slang, no exclamation, contractions only where the sentence would sound stiff without one. Each notice states what is true and what the person can do: "Saving is off. This list will be lost when the tab is closed." Buttons name the action they perform. Work is "completed", never "done"; data is "removed", never "gone".
+Professional and calm, in the register of a well-run private service. Complete sentences, plain words, no slang, no exclamation, contractions only where the sentence would sound stiff without one. Each notice states what is true and what the person can do: "Saving is off. This list will be lost when the tab is closed." Buttons name the action they perform. Work is "completed", never "done"; data is "removed" or "cleared", never "gone". Storage is always "this device". Spelling is American. Apostrophes and quotation marks are curly.
 
 ## Tagline
 
