@@ -237,11 +237,10 @@
     text-decoration: underline;
     text-underline-offset: 3px;
     cursor: pointer;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0.6;
     transition: opacity 0.2s var(--ease), color 0.15s var(--ease);
   }
-  .field:not(:placeholder-shown) ~ .later { opacity: 1; pointer-events: auto; }
+  .field:not(:placeholder-shown) ~ .later, .later:hover, .later:focus-visible { opacity: 1; }
   .later:hover { color: var(--ink); }
   .field:focus-visible { background-size: 100% 2px; }
 
@@ -1304,7 +1303,8 @@
   function addForTomorrow() {
     const input = $('new-today');
     const text = input.value.trim();
-    if (!text) return;
+    if (!text) { input.placeholder = 'Type it, then press Tomorrow'; input.focus(); return; }
+    input.placeholder = 'What will you do today?';
     const key = tomorrow();
     state.days[key] = state.days[key] || [];
     state.days[key].push({ i: uid(), t: text, d: 0 });
