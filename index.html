@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="A todo list that is only as complicated as a list needs to be. Stays in your browser.">
+<meta name="description" content="Ember. Keep the fire within. A todo list that stays in your browser and keeps your streak alive.">
 <title>Ember</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -82,7 +82,9 @@
   /* Header: a small title row, then the hearth. The flame is the one focal point. */
   header { margin-bottom: 1.5rem; }
   .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
-  .wordmark { margin: 0; font: 400 1rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.22em; }
+  .wordmark { margin: 0; display: flex; align-items: baseline; gap: 0.9rem; font: 400 1rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.22em; }
+  .tagline { font-family: var(--body); font-size: 0.8125rem; letter-spacing: 0.08em; color: var(--muted); text-transform: none; white-space: nowrap; }
+  @media (max-width: 400px) { .tagline { display: none; } }
   .hearth {
     display: flex;
     align-items: center;
@@ -564,7 +566,7 @@
 <main>
   <header>
     <div class="topbar">
-      <h1 class="wordmark">Ember</h1>
+      <h1 class="wordmark">Ember<span class="tagline">Keep the fire within</span></h1>
       <button type="button" class="theme" id="theme"></button>
     </div>
     <div class="hearth">

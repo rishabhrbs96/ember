@@ -1,7 +1,7 @@
 {
   "name": "Ember",
   "short_name": "Ember",
-  "description": "A todo list that is only as complicated as a list needs to be.",
+  "description": "Keep the fire within. A todo list that stays on your device and keeps your streak alive.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
