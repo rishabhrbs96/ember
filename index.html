@@ -1585,6 +1585,8 @@
   // The prompt shortens on narrow screens so it never truncates beside the later-day controls.
   const narrow = matchMedia('(max-width: 400px)');
   const tiny = matchMedia('(max-width: 300px)');
+  let addWhen = 'today';
+  let pickedKey = null;
   const prompt = () => {
     if (addWhen === 'tomorrow') return 'What will you do tomorrow?';
     if (addWhen === 'picked' && pickedKey) return `What will you do on ${dayLabel(pickedKey)}?`;
@@ -1596,8 +1598,6 @@
   resetPrompt();
 
   // Which day the box adds to. Today unless a chip says otherwise; resets to Today after each add.
-  let addWhen = 'today';
-  let pickedKey = null;
   function setWhen(which, key) {
     addWhen = which;
     pickedKey = which === 'picked' ? key : null;
