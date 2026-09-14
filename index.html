@@ -1429,19 +1429,26 @@
       if (e.key === 'Enter') { e.preventDefault(); $(formId).requestSubmit(); }
     });
   }
+  // The prompt shortens on narrow screens so it never truncates beside the later-day controls.
+  const narrow = matchMedia('(max-width: 400px)');
+  const prompt = () => narrow.matches ? 'What will you do?' : 'What will you do today?';
+  const resetPrompt = () => { $('new-today').placeholder = prompt(); };
+  narrow.addEventListener('change', resetPrompt);
+  resetPrompt();
+
   // Later days. Tomorrow is one press; any other day goes through the native date picker.
   function addForDay(key, hint) {
     const input = $('new-today');
     const text = input.value.trim();
     if (!text) { input.placeholder = hint; input.focus(); return; }
-    input.placeholder = 'What will you do today?';
+    resetPrompt();
     state.days[key] = state.days[key] || [];
     state.days[key].push({ i: uid(), t: text, d: 0 });
     input.value = '';
     save(); render();
     input.focus();
   }
-  const addForTomorrow = () => addForDay(tomorrow(), 'Type it, then press Add for tomorrow');
+  const addForTomorrow = () => addForDay(tomorrow(), narrow.matches ? 'Type it, then press For tomorrow' : 'Type it, then press Add for tomorrow');
   $('later').addEventListener('click', addForTomorrow);
   $('pick-day').addEventListener('click', () => { $('pick-day').min = tomorrow(); });
   $('pick-day').addEventListener('change', e => {
