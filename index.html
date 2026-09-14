@@ -691,6 +691,8 @@
     <div class="actions">
       <button type="button" class="link" id="data-toggle"></button>
       <button type="button" class="link" id="data-export">Export as JSON</button>
+      <button type="button" class="link" id="data-import">Import from JSON</button>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
       <button type="button" class="link" id="data-erase">Erase everything</button>
     </div>
     <p class="note" id="note-data" hidden></p>
@@ -707,6 +709,19 @@
   <form method="dialog">
     <button type="submit" value="no" class="secondary">Not now</button>
     <button type="submit" value="yes" class="primary">Yes, keep it here</button>
+  </form>
+</dialog>
+
+<dialog id="import-dialog" aria-labelledby="import-title">
+  <div class="dialog-body">
+    <h2 id="import-title">Import this file?</h2>
+    <p id="import-text"></p>
+    <p>Merge keeps everything you have and adds what is new. Replace throws away what is here and uses the file instead.</p>
+  </div>
+  <form method="dialog">
+    <button type="submit" value="no" class="secondary">Cancel</button>
+    <button type="submit" value="merge" class="secondary">Merge</button>
+    <button type="submit" value="replace" class="primary danger">Replace</button>
   </form>
 </dialog>
 
@@ -791,7 +806,7 @@
       changed = true;
     }
     for (const k of state.fuel) {
-      if (!state.days[t].some(x => x.k === k.id)) {
+      if (!state.days[t].some(x => x.k === k.id || x.t.toLowerCase() === k.text.toLowerCase())) {
         state.days[t].push({ i: uid(), t: k.text, d: 0, k: k.id });
         changed = true;
       }
@@ -1223,6 +1238,85 @@
       renderData(storageBroken ? 'Your browser is blocking storage, so nothing could be saved.' : 'Saving to this device.');
     }
   });
+  /* Import. The file is checked field by field; anything malformed is dropped and counted. */
+  function validateImport(raw) {
+    let obj;
+    try { obj = JSON.parse(raw); } catch { return { error: 'That file is not JSON.' }; }
+    if (!obj || typeof obj !== 'object') return { error: 'That file is not an Ember export.' };
+    const str = (v, n = 200) => typeof v === 'string' ? v.trim().slice(0, n) : '';
+    if (Array.isArray(obj.tasks) && !obj.days) {
+      obj = { days: { [today()]: obj.tasks.map(t => ({ i: t.id, t: t.text, d: t.done ? 1 : 0 })) }, fuel: [], streak: { best: obj.streak && obj.streak.best } };
+    }
+    if (!obj.days || typeof obj.days !== 'object' || Array.isArray(obj.days)) return { error: 'That file is not an Ember export. No days in it.' };
+    const out = fresh();
+    let dropped = 0;
+    const dayRe = /^\d{4}-\d{2}-\d{2}$/;
+    for (const [k, arr] of Object.entries(obj.days)) {
+      if (!dayRe.test(k) || !Array.isArray(arr)) { dropped++; continue; }
+      const tasks = [];
+      for (const x of arr) {
+        const t = str(x && x.t);
+        if (!t) { dropped++; continue; }
+        const task = { i: str(x.i, 40) || uid(), t, d: x.d ? 1 : 0 };
+        if (str(x.k, 40)) task.k = str(x.k, 40);
+        if (x.c) task.c = 1;
+        tasks.push(task);
+      }
+      if (tasks.length) out.days[k] = tasks;
+    }
+    const fuelIn = Array.isArray(obj.fuel) ? obj.fuel : Array.isArray(obj.kindling) ? obj.kindling : [];
+    for (const f of fuelIn) {
+      const text = str(f && f.text);
+      if (!text) { dropped++; continue; }
+      out.fuel.push({ id: str(f.id, 40) || uid(), text });
+    }
+    const best = obj.streak && Number(obj.streak.best);
+    out.streak.best = Number.isFinite(best) && best > 0 ? Math.floor(best) : 0;
+    const dayCount = Object.keys(out.days).length;
+    if (!dayCount && !out.fuel.length) return { error: 'That file has no tasks or Fuel in it.' };
+    return { data: out, dayCount, fuelCount: out.fuel.length, dropped };
+  }
+  function mergeInto(cur, inc) {
+    for (const [k, tasks] of Object.entries(inc.days)) {
+      const mine = cur.days[k] || (cur.days[k] = []);
+      for (const t of tasks) {
+        const same = mine.find(x => x.t.toLowerCase() === t.t.toLowerCase());
+        if (same) { if (t.d) same.d = 1; }
+        else mine.push({ ...t, i: cur.days[k].some(x => x.i === t.i) ? uid() : t.i });
+      }
+    }
+    for (const f of inc.fuel) {
+      if (!cur.fuel.some(x => x.text.toLowerCase() === f.text.toLowerCase())) {
+        cur.fuel.push({ id: cur.fuel.some(x => x.id === f.id) ? uid() : f.id, text: f.text });
+      }
+    }
+    cur.streak.best = Math.max(cur.streak.best || 0, inc.streak.best || 0);
+  }
+  $('data-import').addEventListener('click', () => { $('import-file').value = ''; $('import-file').click(); });
+  $('import-file').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const result = validateImport(await file.text());
+    if (result.error) { renderData(result.error); return; }
+    const { data, dayCount, fuelCount, dropped } = result;
+    const parts = [`${dayCount} day${dayCount === 1 ? '' : 's'} with tasks`, `${fuelCount} Fuel item${fuelCount === 1 ? '' : 's'}`];
+    if (data.streak.best) parts.push(`a best streak of ${data.streak.best}`);
+    $('import-text').textContent = `The file holds ${parts.join(', ')}.` + (dropped ? ` ${dropped} malformed entr${dropped === 1 ? 'y was' : 'ies were'} skipped.` : '');
+    const dlg = $('import-dialog');
+    const choice = await new Promise(resolve => { dlg.addEventListener('close', () => resolve(dlg.returnValue), { once: true }); dlg.showModal(); });
+    if (choice === 'replace') {
+      state = { ...data, consent: state.consent, theme: state.theme, rolled: today() };
+    } else if (choice === 'merge') {
+      mergeInto(state, data);
+    } else return;
+    ensureToday();
+    streak();
+    save();
+    applyTheme();
+    render();
+    renderData(choice === 'replace' ? `Replaced with the file: ${dayCount} days, ${fuelCount} Fuel items.` : `Merged the file in: ${dayCount} days, ${fuelCount} Fuel items.`);
+  });
+
   $('data-export').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
