@@ -244,6 +244,26 @@
   }
   .field:not(:placeholder-shown) ~ .later, .later:hover, .later:focus-visible { opacity: 1; }
   .later:hover { color: var(--ink); }
+  .pick-day {
+    position: relative;
+    flex: none;
+    width: 44px;
+    min-height: 44px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 0.2s var(--ease), color 0.15s var(--ease);
+  }
+  .pick-day:hover, .pick-day:focus-within { opacity: 1; color: var(--ink); }
+  .pick-day svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+  .pick-day input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .pick-day:focus-within { outline: 2px solid var(--ember); outline-offset: 2px; border-radius: 3px; }
+  .ahead-toggle { display: block; margin-top: 1.5rem; padding: 0; color: var(--muted); font-size: 0.9375rem; }
+  .ahead li { border-bottom: 1px solid var(--line); }
+  .ahead .plain { min-height: 44px; padding: 0.4rem 0; gap: 0.7rem; }
+  .ahead .when { flex: none; min-width: 6.5rem; color: var(--muted); font-size: 0.9375rem; }
   .field:focus-visible { background-size: 100% 2px; }
 
   /* Rows: hairlines separate tasks. No cards. */
@@ -605,6 +625,10 @@
     <form id="form-today" class="field-row" autocomplete="off">
       <input class="field" id="new-today" type="text" placeholder="What will you do today?" aria-label="New task for today" autofocus enterkeyhint="done" maxlength="200">
       <button type="button" class="later" id="later" title="Put this on tomorrow’s list">Tomorrow</button>
+      <label class="pick-day" title="Put this on a later day">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
+        <input type="date" id="pick-day" aria-label="Put this on a later day">
+      </label>
     </form>
     <ul id="list-today" aria-label="Today's tasks"></ul>
     <p class="note" id="note-today" hidden></p>
@@ -612,7 +636,8 @@
       <span id="left-today"></span>
       <button type="button" class="link" id="clear-today">Clear done</button>
     </div>
-    <p class="small" id="tomorrow-line" hidden></p>
+    <button type="button" class="link ahead-toggle" id="ahead-toggle" hidden aria-expanded="false" aria-controls="list-ahead"></button>
+    <ul id="list-ahead" class="ahead" hidden aria-label="Tasks for later days"></ul>
   </section>
 
   <section id="view-fuel" aria-label="Fuel" hidden>
@@ -978,9 +1003,7 @@
     $('left-today').textContent = open.length === 0 ? 'All done for today' : `${open.length} left`;
 
     const { n, todayDone } = streak();
-    const ahead = (state.days[tomorrow()] || []).length;
-    $('tomorrow-line').hidden = ahead === 0;
-    $('tomorrow-line').textContent = ahead === 1 ? 'One task waiting for tomorrow.' : `${ahead} tasks waiting for tomorrow.`;
+    renderAhead();
     $('date-today').textContent = longDate(today());
     $('date-hint').textContent = tasks.length === 0 ? 'A clean page.'
       : todayDone ? (n > 1 ? `Day ${n} of your streak. Done.` : 'Done.')
@@ -1033,6 +1056,7 @@
   function dayLabel(key) {
     if (key === today()) return 'Today';
     if (key === yesterday()) return 'Yesterday';
+    if (key === tomorrow()) return 'Tomorrow';
     const [y, m, d] = key.split('-').map(Number);
     const date = new Date(y, m - 1, d);
     const base = `${WEEKDAYS[date.getDay()]} ${d} ${MONTHS[m - 1]}`;
@@ -1302,19 +1326,67 @@
       if (e.key === 'Enter') { e.preventDefault(); $(formId).requestSubmit(); }
     });
   }
-  function addForTomorrow() {
+  // Later days. Tomorrow is one press; any other day goes through the native date picker.
+  function addForDay(key, hint) {
     const input = $('new-today');
     const text = input.value.trim();
-    if (!text) { input.placeholder = 'Type it, then press Tomorrow'; input.focus(); return; }
+    if (!text) { input.placeholder = hint; input.focus(); return; }
     input.placeholder = 'What will you do today?';
-    const key = tomorrow();
     state.days[key] = state.days[key] || [];
     state.days[key].push({ i: uid(), t: text, d: 0 });
     input.value = '';
     save(); render();
     input.focus();
   }
+  const addForTomorrow = () => addForDay(tomorrow(), 'Type it, then press Tomorrow');
   $('later').addEventListener('click', addForTomorrow);
+  $('pick-day').addEventListener('click', () => { $('pick-day').min = tomorrow(); });
+  $('pick-day').addEventListener('change', e => {
+    const key = e.target.value;
+    e.target.value = '';
+    if (!key || key <= today()) return;
+    addForDay(key, 'Type it, then pick a day');
+  });
+
+  let aheadOpen = false;
+  function renderAhead() {
+    const keys = Object.keys(state.days).filter(k => k > today() && state.days[k].length).sort();
+    const n = keys.reduce((a, k) => a + state.days[k].length, 0);
+    const toggle = $('ahead-toggle');
+    const list = $('list-ahead');
+    toggle.hidden = n === 0;
+    if (n === 0) { list.hidden = true; aheadOpen = false; return; }
+    const onlyTomorrow = keys.length === 1 && keys[0] === tomorrow();
+    toggle.textContent = (n === 1 ? 'One task' : `${n} tasks`) + (onlyTomorrow ? ' waiting for tomorrow' : ' waiting for later days') + (aheadOpen ? '' : '. Show');
+    toggle.setAttribute('aria-expanded', String(aheadOpen));
+    list.hidden = !aheadOpen;
+    list.textContent = '';
+    if (!aheadOpen) return;
+    for (const key of keys) for (const t of state.days[key]) {
+      const li = document.createElement('li');
+      const p = document.createElement('span');
+      p.className = 'plain';
+      const when = document.createElement('span');
+      when.className = 'when';
+      when.textContent = dayLabel(key);
+      const text = document.createElement('span');
+      text.textContent = t.t;
+      p.append(when, text);
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'remove';
+      rm.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+      rm.setAttribute('aria-label', `Remove from ${dayLabel(key)}: ${t.t}`);
+      rm.addEventListener('click', () => leaveRow(li, () => {
+        state.days[key] = state.days[key].filter(x => x.i !== t.i);
+        if (!state.days[key].length) delete state.days[key];
+        save(); render();
+      }));
+      li.append(p, rm);
+      list.append(li);
+    }
+  }
+  $('ahead-toggle').addEventListener('click', () => { aheadOpen = !aheadOpen; renderAhead(); });
   wireForm('form-today', 'new-today', text => {
     const wasDone = dayDone(today());
     const id = uid();
